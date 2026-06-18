@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1D9E75">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cercle">
+<meta name="description" content="Chronomètre de parole pour cercles de groupe">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Cercle de parole</title>
+<style>
+  :root {
+    --green:#1D9E75;--green-light:#9FE1CB;--green-dark:#0F6E56;--green-bg:#E1F5EE;
+    --purple:#7F77DD;--purple-bg:#EEEDFE;--purple-dark:#3C3489;
+    --gray-bg:#F1EFE8;--gray:#888780;--gray-dark:#2C2C2A;
+    --red:#D85A30;--red-bg:#FAECE7;--red-dark:#993C1D;
+    --text:#1a1a1a;--text-muted:#666;--border:rgba(0,0,0,0.12);
+    --surface:#fff;--surface2:#f7f7f5;--radius:14px;--radius-sm:8px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--text:#f0f0f0;--text-muted:#aaa;--border:rgba(255,255,255,0.12);
+    --surface:#1c1c1e;--surface2:#2c2c2e;--gray-bg:#2c2c2e;
+    --green-bg:#0a3328;--purple-bg:#1e1b4b;--red-bg:#3b1a0f;}
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface2);color:var(--text);display:flex;flex-direction:column;align-items:center;touch-action:manipulation}
+  #app{width:100%;max-width:430px;height:100%;display:flex;flex-direction:column;background:var(--surface2);position:relative;overflow:hidden}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;padding-top:max(14px,env(safe-area-inset-top));background:var(--surface);border-bottom:0.5px solid var(--border);flex-shrink:0}
+  .topbar h1{font-size:17px;font-weight:600}
+  .icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--surface2);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+  .icon-btn:active{background:var(--border)}
+  .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;padding:14px 20px;gap:14px}
+  .phase-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;letter-spacing:0.3px}
+  .badge-idle{background:var(--gray-bg);color:var(--gray)}
+  .badge-speaking{background:var(--green-bg);color:var(--green-dark)}
+  .badge-overtime{background:var(--red-bg);color:var(--red-dark)}
+  .badge-silence{background:var(--purple-bg);color:var(--purple-dark)}
+  .people-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}
+  .pdot{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;border:2.5px solid transparent;transition:all 0.2s;cursor:default;user-select:none}
+  .pdot-waiting{background:var(--surface2);color:var(--text-muted);border-color:var(--border)}
+  .pdot-active{background:var(--green);color:#fff;border-color:var(--green-dark);box-shadow:0 0 0 4px var(--green-bg)}
+  .pdot-done{background:var(--green-bg);color:var(--green-dark);border-color:var(--green-light)}
+  .pdot-overtime{background:var(--red-bg);color:var(--red-dark);border-color:var(--red);box-shadow:0 0 0 4px rgba(216,90,48,0.15)}
+  .timer-wrap{position:relative;width:220px;height:220px;flex-shrink:0}
+  .timer-wrap svg{position:absolute;top:0;left:0}
+  .timer-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+  .timer-time{font-size:52px;font-weight:300;letter-spacing:-3px;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+  .timer-time.overtime{color:var(--red)}
+  .timer-label{font-size:12px;color:var(--text-muted);margin-top:6px}
+  .speaker-card{width:100%;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px}
+  .speaker-avatar{width:44px;height:44px;border-radius:50%;background:var(--green-bg);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex-shrink:0}
+  .speaker-avatar.silence{background:var(--purple-bg);color:var(--purple-dark)}
+  .speaker-avatar.idle{background:var(--gray-bg);color:var(--gray)}
+  .speaker-name{font-size:16px;font-weight:600}
+  .speaker-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
+  .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+  .btn{padding:15px 10px;border-radius:var(--radius);border:0.5px solid var(--border);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.12s;background:var(--surface);color:var(--text);-webkit-user-select:none;user-select:none}
+  .btn:active:not(:disabled){transform:scale(0.96)}
+  .btn:disabled{opacity:0.35;cursor:default}
+  .btn-primary{background:var(--green);color:#fff;border-color:var(--green-dark)}
+  .btn-primary:active:not(:disabled){background:var(--green-dark)}
+  .btn-danger{background:var(--red-bg);color:var(--red-dark);border-color:var(--red)}
+  .btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  #settings-panel{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--surface2);z-index:10;overflow-y:auto;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);padding:0 0 40px;padding-bottom:max(40px,env(safe-area-inset-bottom))}
+  #settings-panel.open{transform:translateX(0)}
+  .settings-topbar{display:flex;align-items:center;gap:12px;padding:14px 20px;padding-top:max(14px,env(safe-area-inset-top));background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:1}
+  .settings-topbar h2{font-size:17px;font-weight:600}
+  .settings-section{background:var(--surface);border-radius:var(--radius);margin:16px 16px 0;overflow:hidden;border:0.5px solid var(--border)}
+  .settings-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);padding:14px 16px 6px}
+  .settings-row{display:flex;align-items:center;padding:11px 16px;gap:12px;border-top:0.5px solid var(--border)}
+  .settings-row:first-of-type{border-top:none}
+  .settings-row label{font-size:14px;flex:1}
+  .settings-row .val{font-size:14px;font-weight:600;color:var(--green);min-width:44px;text-align:right}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100px;height:4px;border-radius:2px;background:var(--border);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+  select{font-size:13px;padding:6px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface2);color:var(--text);outline:none;max-width:160px}
+  .stepper{display:flex;align-items:center;gap:8px}
+  .step-btn{width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.12s}
+  .step-btn:active{background:var(--border)}
+  .step-val{font-size:18px;font-weight:600;min-width:28px;text-align:center}
+  .bottom-spacer{height:max(16px,env(safe-area-inset-bottom));flex-shrink:0}
+  /* preview button for bip selection */
+  .bip-row{display:flex;align-items:center;gap:8px;width:100%}
+  .preview-btn{flex-shrink:0;width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border);background:var(--green-bg);color:var(--green-dark);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+  .preview-btn:active{background:var(--green-light)}
+  /* logo */
+  .logo-watermark{position:fixed;bottom:max(8px,env(safe-area-inset-bottom));left:12px;opacity:0.55;z-index:5;pointer-events:none}
+  .logo-watermark img{height:28px;width:auto;display:block}
+  /* pulse */
+  @keyframes beep-pulse{0%,100%{box-shadow:0 0 0 0 rgba(216,90,48,0)}50%{box-shadow:0 0 0 12px rgba(216,90,48,0.2)}}
+  .pulsing{animation:beep-pulse 2s infinite}
+  /* mode indicator badge in topbar */
+  .mode-pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:12px;border:0.5px solid var(--border);color:var(--text-muted);background:var(--surface2)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <button class="icon-btn" onclick="handleReset()" aria-label="Réinitialiser">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <h1>Cercle de parole</h1>
+      <span class="mode-pill" id="mode-pill">🔊</span>
+    </div>
+    <button class="icon-btn" onclick="openSettings()" aria-label="Réglages">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0m14.14 14.14a10 10 0 0 1-14.14 0"/></svg>
+    </button>
+  </div>
+
+  <div class="main">
+    <div id="phase-badge" class="phase-badge badge-idle">⏸ En attente</div>
+    <div class="people-strip" id="people-strip"></div>
+    <div class="timer-wrap">
+      <svg width="220" height="220" viewBox="0 0 220 220">
+        <circle cx="110" cy="110" r="100" fill="none" stroke="var(--border)" stroke-width="10"/>
+        <circle id="ring-track" cx="110" cy="110" r="100" fill="none" stroke="var(--green)" stroke-width="10" stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="628.3" transform="rotate(-90 110 110)" style="transition:stroke-dashoffset 0.5s linear,stroke 0.3s"/>
+      </svg>
+      <div class="timer-center">
+        <div class="timer-time" id="timer-display">3:00</div>
+        <div class="timer-label" id="timer-label">temps de parole</div>
+      </div>
+    </div>
+    <div class="speaker-card">
+      <div class="speaker-avatar idle" id="speaker-avatar">?</div>
+      <div>
+        <div class="speaker-name" id="speaker-name">—</div>
+        <div class="speaker-sub" id="speaker-sub">Appuyer sur Démarrer</div>
+      </div>
+    </div>
+    <div class="btn-grid">
+      <button class="btn btn-primary" id="btn-start" onclick="handleStart()">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Démarrer
+      </button>
+      <button class="btn" id="btn-stop" onclick="handleStop()" disabled>
+        <svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer
+      </button>
+      <button class="btn" id="btn-pause" onclick="handlePause()" disabled>
+        <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause
+      </button>
+      <button class="btn btn-danger" onclick="handleReset()">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Réinit.
+      </button>
+    </div>
+  </div>
+  <div class="bottom-spacer"></div>
+
+  <!-- Logo watermark -->
+  <div class="logo-watermark">
+    <img src="icons/logo_cgexcel.jpg" alt="CGExcel">
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="settings-panel">
+    <div class="settings-topbar">
+      <button class="icon-btn" onclick="closeSettings()">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h2>Réglages</h2>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Participants</div>
+      <div class="settings-row">
+        <label>Nombre de personnes</label>
+        <div class="stepper">
+          <button class="step-btn" onclick="changePeople(-1)">−</button>
+          <span class="step-val" id="people-val">5</span>
+          <button class="step-btn" onclick="changePeople(1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Durées</div>
+      <div class="settings-row">
+        <label>Parole</label>
+        <input type="range" min="1" max="20" step="1" id="s-parole-min" oninput="updateParoleDisplay()">
+        <span class="val" id="sv-parole">3 min</span>
+      </div>
+      <div class="settings-row" style="padding-top:6px;padding-bottom:10px">
+        <label style="font-size:12px;color:var(--text-muted)">Secondes supplémentaires</label>
+        <input type="range" min="0" max="1" step="1" id="s-parole-sec" oninput="updateParoleDisplay()">
+        <span class="val" id="sv-parole-sec" style="font-size:12px">+0 s</span>
+      </div>
+      <div class="settings-row">
+        <label>Silence (secondes)</label>
+        <input type="range" min="15" max="120" step="15" id="s-silence" oninput="updateSetting('silence',+this.value)">
+        <span class="val" id="sv-silence">60 s</span>
+      </div>
+      <div class="settings-row">
+        <label>Alerte avant fin</label>
+        <input type="range" min="5" max="30" step="5" id="s-alert" oninput="updateSetting('alert',+this.value)">
+        <span class="val" id="sv-alert">15 s</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Mode signal</div>
+      <div class="settings-row">
+        <label>Mode</label>
+        <select id="s-mode" onchange="updateMode(this.value)">
+          <option value="sound">🔊 Son</option>
+          <option value="vibrate">📳 Vibreur</option>
+          <option value="both">🔊📳 Son + Vibreur</option>
+          <option value="silent">🔇 Silencieux</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-section" id="sound-section">
+      <div class="settings-section-title">Type de signal sonore</div>
+      <div class="settings-row">
+        <label>Bip</label>
+        <div class="bip-row">
+          <select id="s-bip" onchange="cfg.bipType=this.value" style="flex:1">
+            <option value="soft">Doux (sine)</option>
+            <option value="beep">Bip carré</option>
+            <option value="bell">Cloche</option>
+            <option value="chirp">Gazouillis</option>
+            <option value="blip">Blip court</option>
+            <option value="chime">Carillon</option>
+          </select>
+          <button class="preview-btn" onclick="previewBip()" title="Écouter">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <label>Volume</label>
+        <input type="range" min="0" max="1" step="0.1" id="s-vol" oninput="updateSetting('vol',+this.value)">
+        <span class="val" id="sv-vol">60%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LOGO_DATA = 'LOGO_PLACEHOLDER';
+
+let cfg = { parole: 180, silence: 60, alert: 15, vol: 0.6, bipType: 'soft', mode: 'sound' };
+let totalPeople = 5;
+let state = 'idle';
+let currentPerson = 0;
+let donePeople = [];
+let timeLeft = 0, totalTime = 0;
+let ticker = null, alertFired = false, bipTicker = null, savedState = null;
+let audioCtx = null;
+
+const $ = id => document.getElementById(id);
+const CIRC = 628.3;
+
+function fmt(s) {
+  if (s < 0) { const a=-s; return '-'+Math.floor(a/60)+':'+(a%60<10?'0':'')+a%60; }
+  return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;
+}
+
+// ─── AUDIO ────────────────────────────────────────────────
+function ctx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playBipType(type, vol) {
+  if (cfg.mode === 'silent') return;
+  if (cfg.mode === 'vibrate') { vibrate([80]); return; }
+  // sound or both
+  if (cfg.mode === 'both') vibrate([60]);
+  try {
+    const c = ctx();
+    const g = c.createGain();
+    g.connect(c.destination);
+    const t = c.currentTime;
+    switch(type) {
+      case 'soft':
+        playSine(c, g, 660, vol, 0.25, t); break;
+      case 'beep':
+        playWave(c, g, 'square', 660, vol*0.4, 0.18, t); break;
+      case 'bell':
+        playSine(c, g, 880, vol, 0.5, t);
+        playSine(c, g, 1320, vol*0.4, 0.4, t+0.01); break;
+      case 'chirp':
+        playChirp(c, g, vol, t); break;
+      case 'blip':
+        playSine(c, g, 1000, vol*0.8, 0.08, t); break;
+      case 'chime':
+        playSine(c, g, 523, vol*0.7, 0.35, t);
+        playSine(c, g, 659, vol*0.7, 0.35, t+0.18);
+        playSine(c, g, 784, vol*0.7, 0.45, t+0.36); break;
+    }
+  } catch(e) {}
+}
+
+function playSine(c, g, freq, vol, dur, t) {
+  const o = c.createOscillator();
+  const gn = c.createGain();
+  o.connect(gn); gn.connect(g);
+  o.type = 'sine'; o.frequency.value = freq;
+  gn.gain.setValueAtTime(vol * cfg.vol, t);
+  gn.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+
+function playWave(c, g, wave, freq, vol, dur, t) {
+  const o = c.createOscillator();
+  const gn = c.createGain();
+  o.connect(gn); gn.connect(g);
+  o.type = wave; o.frequency.value = freq;
+  gn.gain.setValueAtTime(vol * cfg.vol, t);
+  gn.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+
+function playChirp(c, g, vol, t) {
+  const o = c.createOscillator();
+  const gn = c.createGain();
+  o.connect(gn); gn.connect(g);
+  o.type = 'sine';
+  o.frequency.setValueAtTime(400, t);
+  o.frequency.exponentialRampToValueAtTime(1200, t + 0.15);
+  gn.gain.setValueAtTime(vol * cfg.vol, t);
+  gn.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+  o.start(t); o.stop(t + 0.25);
+}
+
+function vibrate(pattern) {
+  if ('vibrate' in navigator) navigator.vibrate(pattern);
+}
+
+function alertBip()  { playBipType(cfg.bipType, 0.9); if(cfg.mode==='both'||cfg.mode==='vibrate') vibrate([100,50,100]); }
+function doneBip()   {
+  if (cfg.mode !== 'silent' && cfg.mode !== 'vibrate') {
+    try { const c=ctx(); const t=c.currentTime; playSine(c,c.createGain(),523,0.7,0.5,t); c.createGain().connect(c.destination); } catch(e) {}
+    playBipType('chime', 0.7);
+  }
+  if (cfg.mode==='both'||cfg.mode==='vibrate') vibrate([200,100,200,100,300]);
+}
+
+function startOvertimeBips() {
+  stopBips();
+  playBipType(cfg.bipType, 0.5);
+  if (cfg.mode==='both'||cfg.mode==='vibrate') vibrate([200]);
+  bipTicker = setInterval(() => {
+    playBipType(cfg.bipType, 0.4);
+    if (cfg.mode==='both'||cfg.mode==='vibrate') vibrate([150]);
+  }, 2500);
+}
+function stopBips() { if (bipTicker) { clearInterval(bipTicker); bipTicker = null; } }
+
+function previewBip() {
+  try { ctx().resume(); } catch(e) {}
+  cfg.bipType = $('s-bip').value;
+  playBipType(cfg.bipType, 1.0);
+  if (cfg.mode==='both'||cfg.mode==='vibrate') vibrate([100]);
+}
+
+// ─── UI ───────────────────────────────────────────────────
+function setRing(left, total, color) {
+  const pct = total > 0 ? Math.max(0, left/total) : 0;
+  $('ring-track').setAttribute('stroke-dashoffset', (CIRC*(1-pct)).toFixed(1));
+  if (color) $('ring-track').setAttribute('stroke', color);
+}
+function setBadge(txt, cls) { const b=$('phase-badge'); b.textContent=txt; b.className='phase-badge '+cls; }
+function setAvatar(txt, cls) { const a=$('speaker-avatar'); a.textContent=txt; a.className='speaker-avatar '+(cls||''); }
+function setBtn(id, enabled, html) { const b=$(id); b.disabled=!enabled; if(html) b.innerHTML=html; }
+function refreshStrip() {
+  const s=$('people-strip'); s.innerHTML='';
+  for (let i=0;i<totalPeople;i++) {
+    const d=document.createElement('div');
+    const done=donePeople.includes(i);
+    const active=!done&&state!=='idle'&&i===currentPerson;
+    const over=active&&state==='overtime';
+    d.className='pdot '+(done?'pdot-done':over?'pdot-overtime':active?'pdot-active':'pdot-waiting');
+    if(over) d.classList.add('pulsing');
+    d.textContent='P'+(i+1);
+    s.appendChild(d);
+  }
+}
+function updateModePill() {
+  const icons = {sound:'🔊',vibrate:'📳',both:'🔊📳',silent:'🔇'};
+  $('mode-pill').textContent = icons[cfg.mode]||'🔊';
+  $('sound-section').style.display = cfg.mode==='vibrate'||cfg.mode==='silent' ? 'none' : '';
+}
+
+// ─── TICK ─────────────────────────────────────────────────
+function tick() {
+  timeLeft--;
+  $('timer-display').textContent = fmt(state==='overtime' ? timeLeft : timeLeft);
+  if (state==='speaking') {
+    if (!alertFired && timeLeft===cfg.alert) { alertFired=true; alertBip(); }
+    if (timeLeft<=0) { enterOvertime(); return; }
+    setRing(timeLeft, totalTime, 'var(--green)');
+    $('timer-display').className='timer-time';
+  } else if (state==='overtime') {
+    setRing(0, totalTime, '#D85A30');
+    $('timer-display').className='timer-time overtime';
+  } else if (state==='silence') {
+    if (timeLeft<=0) { endSilence(); return; }
+    setRing(timeLeft, totalTime, 'var(--purple)');
+  }
+}
+
+function enterOvertime() {
+  state='overtime';
+  timeLeft=0;
+  setRing(0,totalTime,'#D85A30');
+  setBadge('⚠ Temps dépassé','phase-badge badge-overtime');
+  $('timer-display').className='timer-time overtime';
+  $('timer-label').textContent='dépassé';
+  startOvertimeBips();
+  refreshStrip();
+  clearInterval(ticker);
+  ticker=setInterval(()=>{ timeLeft--; $('timer-display').textContent=fmt(timeLeft); },1000);
+}
+
+function enterSilence() {
+  stopBips(); clearInterval(ticker);
+  state='silence'; totalTime=cfg.silence; timeLeft=cfg.silence;
+  $('timer-display').textContent=fmt(timeLeft);
+  $('timer-display').className='timer-time';
+  $('timer-label').textContent='silence';
+  setBadge('🤫 Silence','phase-badge badge-silence');
+  setAvatar('🌙','silence');
+  $('speaker-name').textContent='Silence';
+  $('speaker-sub').textContent='Laissez décanter…';
+  setRing(timeLeft,totalTime,'var(--purple)');
+  setBtn('btn-stop',false); setBtn('btn-pause',true);
+  refreshStrip();
+  ticker=setInterval(tick,1000);
+}
+
+function endSilence() {
+  clearInterval(ticker); ticker=null;
+  donePeople.push(currentPerson);
+  let next=(currentPerson+1)%totalPeople;
+  while(donePeople.includes(next)&&donePeople.length<totalPeople) next=(next+1)%totalPeople;
+  currentPerson=next;
+  if(donePeople.length>=totalPeople) { showAllDone(); return; }
+  state='idle'; totalTime=cfg.parole; timeLeft=totalTime;
+  $('timer-display').textContent=fmt(timeLeft);
+  $('timer-display').className='timer-time';
+  $('timer-label').textContent='temps de parole';
+  setBadge('⏸ En attente','phase-badge badge-idle');
+  setRing(timeLeft,totalTime,'var(--green)');
+  setAvatar('P'+(currentPerson+1));
+  $('speaker-name').textContent='Personne '+(currentPerson+1);
+  $('speaker-sub').textContent='Tour '+(donePeople.length+1)+' sur '+totalPeople;
+  setBtn('btn-start',true,`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Démarrer`);
+  setBtn('btn-stop',false); setBtn('btn-pause',false);
+  refreshStrip();
+}
+
+function showAllDone() {
+  state='done'; doneBip();
+  setBadge('✓ Tour terminé','phase-badge badge-speaking');
+  setAvatar('✓');
+  $('speaker-name').textContent='Tour complet !';
+  $('speaker-sub').textContent='Toutes les personnes ont parlé';
+  $('timer-display').textContent='—';
+  setRing(0,1,'var(--green)');
+  setBtn('btn-start',false); setBtn('btn-stop',false); setBtn('btn-pause',false);
+  refreshStrip();
+}
+
+// ─── BUTTONS ──────────────────────────────────────────────
+function handleStart() {
+  if(state!=='idle') return;
+  try { ctx().resume(); } catch(e) {}
+  state='speaking'; alertFired=false; totalTime=cfg.parole; timeLeft=totalTime;
+  $('timer-display').textContent=fmt(timeLeft);
+  $('timer-display').className='timer-time';
+  $('timer-label').textContent='temps de parole';
+  setBadge('🎤 Parole','phase-badge badge-speaking');
+  setRing(timeLeft,totalTime,'var(--green)');
+  setAvatar('P'+(currentPerson+1));
+  $('speaker-name').textContent='Personne '+(currentPerson+1);
+  $('speaker-sub').textContent='Tour '+(donePeople.length+1)+' sur '+totalPeople;
+  setBtn('btn-start',false);
+  setBtn('btn-stop',true,`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`);
+  setBtn('btn-pause',true);
+  refreshStrip();
+  ticker=setInterval(tick,1000);
+}
+function handleStop() {
+  if(state==='speaking'||state==='overtime') { clearInterval(ticker); ticker=null; stopBips(); enterSilence(); }
+}
+function handlePause() {
+  if(state==='paused') {
+    state=savedState;
+    if(state==='overtime') startOvertimeBips();
+    ticker=setInterval(tick,1000);
+    setBtn('btn-pause',true,`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`);
+    setBadge(state==='silence'?'🤫 Silence':'🎤 Parole', state==='silence'?'phase-badge badge-silence':'phase-badge badge-speaking');
+  } else if(state==='speaking'||state==='overtime'||state==='silence') {
+    savedState=state; state='paused';
+    clearInterval(ticker); ticker=null; stopBips();
+    setBadge('⏸ Pause','phase-badge badge-idle');
+    setBtn('btn-pause',true,`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Reprendre`);
+  }
+}
+function handleReset() {
+  clearInterval(ticker); ticker=null; stopBips();
+  state='idle'; currentPerson=0; donePeople=[]; alertFired=false; savedState=null;
+  totalTime=cfg.parole; timeLeft=totalTime;
+  $('timer-display').textContent=fmt(timeLeft);
+  $('timer-display').className='timer-time';
+  $('timer-label').textContent='temps de parole';
+  setBadge('⏸ En attente','phase-badge badge-idle');
+  setRing(0,1,'var(--green)');
+  setAvatar('?','idle');
+  $('speaker-name').textContent='—';
+  $('speaker-sub').textContent='Appuyer sur Démarrer';
+  setBtn('btn-start',true,`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Démarrer`);
+  setBtn('btn-stop',false,`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`);
+  setBtn('btn-pause',false,`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`);
+  refreshStrip();
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────
+function openSettings() { $('settings-panel').classList.add('open'); }
+function closeSettings() { $('settings-panel').classList.remove('open'); }
+function updateMode(v) { cfg.mode=v; updateModePill(); }
+function updateSetting(key,val) {
+  cfg[key]=val;
+  if(key==='silence') $('sv-silence').textContent=val+' s';
+  if(key==='alert') $('sv-alert').textContent=val+' s';
+  if(key==='vol') $('sv-vol').textContent=Math.round(val*100)+'%';
+}
+function updateParoleDisplay() {
+  const min=parseInt($('s-parole-min').value)||0;
+  const sec=parseInt($('s-parole-sec').value)*30; // 0 or 30
+  cfg.parole=min*60+sec;
+  $('sv-parole').textContent=min+' min';
+  $('sv-parole-sec').textContent=sec>0?'+30 s':'+0 s';
+  if(state==='idle') { totalTime=cfg.parole; timeLeft=totalTime; $('timer-display').textContent=fmt(timeLeft); setRing(0,1,'var(--green)'); }
+}
+function changePeople(d) {
+  totalPeople=Math.max(2,Math.min(10,totalPeople+d));
+  $('people-val').textContent=totalPeople;
+  if(state==='idle') { donePeople=[]; currentPerson=0; refreshStrip(); }
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+$('s-parole-min').value=3; $('s-parole-sec').value=0;
+$('s-silence').value=60; $('s-alert').value=15; $('s-vol').value=0.6;
+$('sv-parole').textContent='3 min'; $('sv-parole-sec').textContent='+0 s';
+$('sv-silence').textContent='60 s'; $('sv-alert').textContent='15 s'; $('sv-vol').textContent='60%';
+$('people-val').textContent=totalPeople;
+updateModePill();
+handleReset();
+
+if('wakeLock' in navigator) {
+  navigator.wakeLock.request('screen').catch(()=>{});
+  document.addEventListener('visibilitychange',async()=>{
+    if(document.visibilityState==='visible') try{ await navigator.wakeLock.request('screen'); }catch(e){}
+  });
+}
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
