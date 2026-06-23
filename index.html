@@ -26,63 +26,131 @@
     --green-bg:#0a3328;--purple-bg:#1e1b4b;--red-bg:#3b1a0f;}
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;overflow:hidden}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface2);color:var(--text);display:flex;flex-direction:column;align-items:center;touch-action:manipulation}
-  #app{width:100%;max-width:430px;height:100%;display:flex;flex-direction:column;background:var(--surface2);position:relative;overflow:hidden}
 
-  /* TOPBAR */
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;padding-top:max(12px,env(safe-area-inset-top));background:var(--surface);border-bottom:0.5px solid var(--border);flex-shrink:0}
-  .topbar h1{font-size:17px;font-weight:600}
-  .icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0}
+  /* Full screen, no scroll */
+  html,body{
+    height:100%; width:100%;
+    overflow:hidden;
+    touch-action:manipulation;
+  }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:var(--surface2);color:var(--text);
+    display:flex;justify-content:center;align-items:stretch;
+  }
+
+  #app{
+    width:100%; max-width:430px;
+    height:100%;
+    display:flex; flex-direction:column;
+    background:var(--surface2);
+    position:relative; overflow:hidden;
+  }
+
+  /* TOPBAR — fixed small height */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;
+    height:52px;
+    padding-top:env(safe-area-inset-top);
+    background:var(--surface);
+    border-bottom:0.5px solid var(--border);
+    flex-shrink:0;
+  }
+  .topbar h1{font-size:16px;font-weight:600}
+  .icon-btn{width:34px;height:34px;border-radius:50%;border:none;background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0}
   .icon-btn:active{background:var(--border)}
-  .mode-pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:12px;border:0.5px solid var(--border);color:var(--text-muted);background:var(--surface2)}
+  .mode-pill{font-size:11px;font-weight:600;padding:2px 7px;border-radius:12px;border:0.5px solid var(--border);color:var(--text-muted);background:var(--surface2)}
 
-  /* MAIN */
-  .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;padding:10px 16px;gap:10px}
+  /* MAIN — fills all remaining space, no scroll */
+  .main{
+    flex:1;
+    min-height:0;
+    display:flex;flex-direction:column;align-items:center;
+    justify-content:space-evenly;
+    padding:0 16px;
+    padding-bottom:max(8px,env(safe-area-inset-bottom));
+    overflow:hidden;
+  }
 
   /* BADGE */
-  .phase-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;letter-spacing:0.3px}
+  .phase-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:0.3px;white-space:nowrap}
   .badge-idle{background:var(--gray-bg);color:var(--gray)}
   .badge-speaking{background:var(--green-bg);color:var(--green-dark)}
   .badge-overtime{background:var(--red-bg);color:var(--red-dark)}
   .badge-silence{background:var(--purple-bg);color:var(--purple-dark)}
 
   /* PEOPLE */
-  .people-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}
-  .pdot{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;border:2.5px solid transparent;transition:all 0.2s;user-select:none}
+  .people-strip{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:100%}
+  .pdot{
+    /* size set by JS based on available space */
+    width:var(--dot-size,36px); height:var(--dot-size,36px);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:600;border:2px solid transparent;
+    transition:all 0.2s;user-select:none;flex-shrink:0;
+  }
   .pdot-waiting{background:var(--surface2);color:var(--text-muted);border-color:var(--border)}
-  .pdot-active{background:var(--green);color:#fff;border-color:var(--green-dark);box-shadow:0 0 0 4px var(--green-bg)}
+  .pdot-active{background:var(--green);color:#fff;border-color:var(--green-dark);box-shadow:0 0 0 3px var(--green-bg)}
   .pdot-done{background:var(--green-bg);color:var(--green-dark);border-color:var(--green-light)}
-  .pdot-overtime{background:var(--red-bg);color:var(--red-dark);border-color:var(--red);box-shadow:0 0 0 4px rgba(216,90,48,0.15)}
+  .pdot-overtime{background:var(--red-bg);color:var(--red-dark);border-color:var(--red);box-shadow:0 0 0 3px rgba(216,90,48,0.15)}
 
-  /* TIMER — bigger */
-  .timer-wrap{position:relative;width:270px;height:270px;flex-shrink:0}
-  .timer-wrap svg{position:absolute;top:0;left:0}
-  .timer-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
-  .timer-time{font-size:68px;font-weight:300;letter-spacing:-4px;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+  /* TIMER — fluid size via CSS variable set by JS */
+  .timer-wrap{
+    position:relative;
+    width:var(--ring-size,240px); height:var(--ring-size,240px);
+    flex-shrink:0;
+  }
+  .timer-wrap svg{position:absolute;top:0;left:0;width:100%;height:100%}
+  .timer-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:100%}
+  .timer-time{
+    font-size:var(--time-font,56px);
+    font-weight:300;letter-spacing:-3px;color:var(--text);line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
   .timer-time.overtime{color:var(--red)}
-  .timer-label{font-size:13px;color:var(--text-muted);margin-top:8px}
+  .timer-label{font-size:var(--label-font,12px);color:var(--text-muted);margin-top:6px}
 
   /* SPEAKER CARD */
-  .speaker-card{width:100%;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:12px}
-  .speaker-avatar{width:42px;height:42px;border-radius:50%;background:var(--green-bg);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;flex-shrink:0}
+  .speaker-card{
+    width:100%;background:var(--surface);border:0.5px solid var(--border);
+    border-radius:var(--radius);padding:10px 14px;
+    display:flex;align-items:center;gap:10px;flex-shrink:0;
+  }
+  .speaker-avatar{
+    width:var(--avatar-size,40px);height:var(--avatar-size,40px);
+    border-radius:50%;background:var(--green-bg);color:var(--green-dark);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;font-weight:600;flex-shrink:0;
+  }
   .speaker-avatar.silence{background:var(--purple-bg);color:var(--purple-dark)}
   .speaker-avatar.idle{background:var(--gray-bg);color:var(--gray)}
-  .speaker-name{font-size:15px;font-weight:600}
-  .speaker-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .speaker-name{font-size:var(--card-font,14px);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .speaker-sub{font-size:var(--card-sub,11px);color:var(--text-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-  /* BUTTONS — only 3 main buttons now */
-  .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
-  .btn{padding:15px 10px;border-radius:var(--radius);border:0.5px solid var(--border);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.12s;background:var(--surface);color:var(--text);-webkit-user-select:none;user-select:none}
+  /* BUTTONS */
+  .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+  .btn{
+    padding:0; height:var(--btn-h,50px);
+    border-radius:var(--radius);border:0.5px solid var(--border);
+    font-size:var(--btn-font,14px);font-weight:600;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    transition:all 0.12s;background:var(--surface);color:var(--text);
+    -webkit-user-select:none;user-select:none;
+  }
   .btn:active:not(:disabled){transform:scale(0.96)}
   .btn:disabled{opacity:0.35;cursor:default}
   .btn-primary{background:var(--green);color:#fff;border-color:var(--green-dark)}
   .btn-primary:active:not(:disabled){background:var(--green-dark)}
   .btn-full{grid-column:1/-1}
-  .btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 
-  /* BOTTOM */
-  .bottom-spacer{height:max(12px,env(safe-area-inset-bottom));flex-shrink:0}
+  /* LOGO */
+  .logo-watermark{position:absolute;bottom:max(6px,env(safe-area-inset-bottom));left:10px;opacity:0.45;z-index:5;pointer-events:none}
+  .logo-watermark img{height:22px;width:auto;display:block}
+
+  /* PULSE */
+  @keyframes beep-pulse{0%,100%{box-shadow:0 0 0 0 rgba(216,90,48,0)}50%{box-shadow:0 0 0 10px rgba(216,90,48,0.2)}}
+  .pulsing{animation:beep-pulse 2s infinite}
 
   /* SETTINGS PANEL */
   #settings-panel{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--surface2);z-index:10;overflow-y:auto;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);padding-bottom:max(40px,env(safe-area-inset-bottom))}
@@ -90,54 +158,43 @@
   .settings-topbar{display:flex;align-items:center;gap:12px;padding:14px 20px;padding-top:max(14px,env(safe-area-inset-top));background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:1}
   .settings-topbar h2{font-size:17px;font-weight:600}
   .settings-section{background:var(--surface);border-radius:var(--radius);margin:16px 16px 0;overflow:hidden;border:0.5px solid var(--border)}
-  .settings-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);padding:14px 16px 6px}
-  .settings-row{display:flex;align-items:center;padding:11px 16px;gap:12px;border-top:0.5px solid var(--border)}
+  .settings-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);padding:12px 16px 4px}
+  .settings-row{display:flex;align-items:center;padding:10px 16px;gap:12px;border-top:0.5px solid var(--border)}
   .settings-row:first-of-type{border-top:none}
   .settings-row label{font-size:14px;flex:1}
   .settings-row .val{font-size:14px;font-weight:600;color:var(--green);min-width:44px;text-align:right}
   input[type=range]{-webkit-appearance:none;appearance:none;width:100px;height:4px;border-radius:2px;background:var(--border);outline:none}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
-  select{font-size:13px;padding:6px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface2);color:var(--text);outline:none;max-width:160px;flex:1}
+  select{font-size:13px;padding:6px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface2);color:var(--text);outline:none;flex:1}
   .stepper{display:flex;align-items:center;gap:8px}
   .step-btn{width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
   .step-btn:active{background:var(--border)}
   .step-val{font-size:18px;font-weight:600;min-width:28px;text-align:center}
-
-  /* CREDITS */
-  .credits-block{padding:14px 16px;line-height:1.7;font-size:13px;color:var(--text-muted)}
+  .credits-block{padding:12px 16px;line-height:1.8;font-size:13px;color:var(--text-muted)}
   .credits-block strong{color:var(--text);font-weight:600}
   .credits-block a{color:var(--green);text-decoration:none}
-
-  /* LOGO */
-  .logo-watermark{position:fixed;bottom:max(8px,env(safe-area-inset-bottom));left:12px;opacity:0.5;z-index:5;pointer-events:none}
-  .logo-watermark img{height:26px;width:auto;display:block}
-
-  /* PULSE */
-  @keyframes beep-pulse{0%,100%{box-shadow:0 0 0 0 rgba(216,90,48,0)}50%{box-shadow:0 0 0 12px rgba(216,90,48,0.2)}}
-  .pulsing{animation:beep-pulse 2s infinite}
 </style>
 </head>
 <body>
 <div id="app">
   <div class="topbar">
-    <button class="icon-btn" onclick="handleReset()" aria-label="Réinitialiser" title="Réinitialiser">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    <button class="icon-btn" onclick="handleReset()" aria-label="Réinitialiser">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
-    <div style="display:flex;align-items:center;gap:8px">
+    <div style="display:flex;align-items:center;gap:7px">
       <h1>Cercle de parole</h1>
       <span class="mode-pill" id="mode-pill">🔊</span>
     </div>
     <button class="icon-btn" onclick="openSettings()" aria-label="Réglages">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0m14.14 14.14a10 10 0 0 1-14.14 0"/></svg>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0m14.14 14.14a10 10 0 0 1-14.14 0"/></svg>
     </button>
   </div>
 
-  <div class="main">
+  <div class="main" id="main">
     <div id="phase-badge" class="phase-badge badge-idle">⏸ En attente</div>
     <div class="people-strip" id="people-strip"></div>
-
-    <div class="timer-wrap">
-      <svg width="270" height="270" viewBox="0 0 270 270">
+    <div class="timer-wrap" id="timer-wrap">
+      <svg id="ring-svg" viewBox="0 0 270 270" xmlns="http://www.w3.org/2000/svg">
         <circle cx="135" cy="135" r="120" fill="none" stroke="var(--border)" stroke-width="11"/>
         <circle id="ring-track" cx="135" cy="135" r="120" fill="none" stroke="var(--green)" stroke-width="11"
           stroke-linecap="round" stroke-dasharray="753.98" stroke-dashoffset="753.98"
@@ -148,16 +205,13 @@
         <div class="timer-label" id="timer-label">temps de parole</div>
       </div>
     </div>
-
     <div class="speaker-card">
       <div class="speaker-avatar idle" id="speaker-avatar">?</div>
-      <div>
+      <div style="min-width:0;flex:1">
         <div class="speaker-name" id="speaker-name">—</div>
         <div class="speaker-sub" id="speaker-sub">Appuyer sur Démarrer</div>
       </div>
     </div>
-
-    <!-- 3 buttons: Démarrer (full width when alone) | Terminer | Pause -->
     <div class="btn-grid" id="btn-grid">
       <button class="btn btn-primary btn-full" id="btn-start" onclick="handleStart()">
         <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Démarrer
@@ -170,7 +224,6 @@
       </button>
     </div>
   </div>
-  <div class="bottom-spacer"></div>
 
   <div class="logo-watermark">
     <img src="icons/logo_cgexcel.jpg" alt="CGExcel">
@@ -184,7 +237,6 @@
       </button>
       <h2>Réglages</h2>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Participants</div>
       <div class="settings-row">
@@ -196,7 +248,6 @@
         </div>
       </div>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Durées</div>
       <div class="settings-row">
@@ -220,7 +271,6 @@
         <span class="val" id="sv-alert">15 s</span>
       </div>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Mode signal</div>
       <div class="settings-row">
@@ -233,7 +283,6 @@
         </select>
       </div>
     </div>
-
     <div class="settings-section" id="sound-section">
       <div class="settings-section-title">Type de signal sonore</div>
       <div class="settings-row">
@@ -248,7 +297,6 @@
         </select>
       </div>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Crédits</div>
       <div class="credits-block">
@@ -259,133 +307,136 @@
         <a href="https://cyrille31.github.io/cercle-parole/" target="_blank">cyrille31.github.io/cercle-parole</a>
       </div>
     </div>
-
-  </div><!-- /settings -->
-</div><!-- /app -->
+  </div>
+</div>
 
 <script>
 let cfg = { parole:180, silence:60, alert:15, bipType:'soft', mode:'sound' };
 let totalPeople = 5;
-let state = 'idle'; // idle | speaking | overtime | silence | paused
+let state = 'idle';
 let currentPerson = 0, donePeople = [];
 let timeLeft = 0, totalTime = 0;
 let ticker = null, alertFired = false, bipTicker = null, savedState = null;
 let audioCtx = null;
 
 const $ = id => document.getElementById(id);
-const CIRC = 753.98; // 2*pi*120
+const CIRC = 753.98;
 
-function fmt(s) {
-  if (s < 0) { const a=-s; return '-'+Math.floor(a/60)+':'+(a%60<10?'0':'')+a%60; }
-  return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;
+// ─── RESPONSIVE LAYOUT ────────────────────────────────────
+function resize() {
+  const topbarH = 52;
+  const safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || 0);
+  const safeBot = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || 0);
+  const totalH = window.innerHeight;
+  const availH = totalH - topbarH - Math.max(8, safeBot);
+  const availW = Math.min(window.innerWidth, 430);
+
+  // Fixed elements heights (approximate)
+  const badgeH   = 28;
+  const cardH    = 62;
+  const btnsH    = 58;  // one row of buttons
+  const gaps     = 10 * 5; // space-evenly gaps
+  const stripH   = 44;
+
+  // Remaining height for the ring
+  const ringAvail = availH - badgeH - stripH - cardH - btnsH - gaps;
+  const ringMax   = Math.min(ringAvail, availW - 32);
+  const ringSize  = Math.max(120, Math.floor(ringMax));
+
+  const root = document.documentElement.style;
+  root.setProperty('--ring-size', ringSize + 'px');
+  root.setProperty('--time-font', Math.max(28, Math.floor(ringSize * 0.26)) + 'px');
+  root.setProperty('--label-font', Math.max(10, Math.floor(ringSize * 0.055)) + 'px');
+
+  // Dots
+  const dotSize = Math.max(28, Math.min(40, Math.floor(availW / (totalPeople + 2))));
+  root.setProperty('--dot-size', dotSize + 'px');
+
+  // Avatar & card fonts
+  const avatarSize = Math.max(32, Math.min(44, Math.floor(cardH * 0.65)));
+  root.setProperty('--avatar-size', avatarSize + 'px');
+  root.setProperty('--card-font', Math.max(12, Math.min(15, Math.floor(cardH * 0.22))) + 'px');
+  root.setProperty('--card-sub', Math.max(10, Math.min(12, Math.floor(cardH * 0.17))) + 'px');
+
+  // Button height
+  const btnH = Math.max(42, Math.min(54, Math.floor(btnsH * 0.9)));
+  root.setProperty('--btn-h', btnH + 'px');
+  root.setProperty('--btn-font', Math.max(12, Math.min(15, Math.floor(btnH * 0.28))) + 'px');
 }
+
+window.addEventListener('resize', resize);
+resize();
 
 // ─── AUDIO ────────────────────────────────────────────────
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   return audioCtx;
 }
-function playSine(c, freq, vol, dur, startT) {
-  const o=c.createOscillator(), g=c.createGain();
-  o.connect(g); g.connect(c.destination);
-  o.type='sine'; o.frequency.value=freq;
-  g.gain.setValueAtTime(vol, startT);
-  g.gain.exponentialRampToValueAtTime(0.001, startT+dur);
-  o.start(startT); o.stop(startT+dur+0.05);
-}
-function playWave(c, wave, freq, vol, dur, startT) {
-  const o=c.createOscillator(), g=c.createGain();
-  o.connect(g); g.connect(c.destination);
-  o.type=wave; o.frequency.value=freq;
-  g.gain.setValueAtTime(vol, startT);
-  g.gain.exponentialRampToValueAtTime(0.001, startT+dur);
-  o.start(startT); o.stop(startT+dur+0.05);
-}
-function playChirp(c, vol, startT) {
-  const o=c.createOscillator(), g=c.createGain();
-  o.connect(g); g.connect(c.destination);
-  o.type='sine';
-  o.frequency.setValueAtTime(400, startT);
-  o.frequency.exponentialRampToValueAtTime(1200, startT+0.15);
-  g.gain.setValueAtTime(vol, startT);
-  g.gain.exponentialRampToValueAtTime(0.001, startT+0.2);
-  o.start(startT); o.stop(startT+0.25);
-}
+function playSine(c,freq,vol,dur,t){ const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination); o.type='sine';o.frequency.value=freq; g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur); o.start(t);o.stop(t+dur+0.05); }
+function playWave(c,wave,freq,vol,dur,t){ const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination); o.type=wave;o.frequency.value=freq; g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur); o.start(t);o.stop(t+dur+0.05); }
+function playChirp(c,vol,t){ const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination); o.type='sine'; o.frequency.setValueAtTime(400,t);o.frequency.exponentialRampToValueAtTime(1200,t+0.15); g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.2); o.start(t);o.stop(t+0.25); }
 
-function playBip(type, vol) {
-  if (cfg.mode==='silent') return;
-  if (cfg.mode==='vibrate') { doVibrate([80]); return; }
-  if (cfg.mode==='both') doVibrate([60]);
-  try {
-    const c=getCtx(); c.resume();
-    const t=c.currentTime;
-    switch(type) {
+function playBip(type,vol){
+  if(cfg.mode==='silent') return;
+  if(cfg.mode==='vibrate'){doVibrate([80]);return;}
+  if(cfg.mode==='both') doVibrate([60]);
+  try{
+    const c=getCtx(); c.resume(); const t=c.currentTime;
+    switch(type){
       case 'soft':  playSine(c,660,vol,0.25,t); break;
       case 'beep':  playWave(c,'square',660,vol*0.35,0.18,t); break;
-      case 'bell':  playSine(c,880,vol,0.5,t); playSine(c,1320,vol*0.4,0.4,t+0.01); break;
+      case 'bell':  playSine(c,880,vol,0.5,t);playSine(c,1320,vol*0.4,0.4,t+0.01); break;
       case 'chirp': playChirp(c,vol,t); break;
       case 'blip':  playSine(c,1000,vol*0.8,0.08,t); break;
-      case 'chime': playSine(c,523,vol*0.7,0.35,t); playSine(c,659,vol*0.7,0.35,t+0.18); playSine(c,784,vol*0.7,0.45,t+0.36); break;
+      case 'chime': playSine(c,523,vol*0.7,0.35,t);playSine(c,659,vol*0.7,0.35,t+0.18);playSine(c,784,vol*0.7,0.45,t+0.36); break;
     }
-  } catch(e){}
+  }catch(e){}
 }
-function doVibrate(p) { if('vibrate' in navigator) navigator.vibrate(p); }
-function alertBip()  { playBip(cfg.bipType,0.9); if(cfg.mode!=='sound') doVibrate([100,50,100]); }
-function doneBip()   { playBip('chime',0.8); if(cfg.mode!=='sound') doVibrate([200,100,200,100,300]); }
-function startOvertimeBips() {
-  stopBips(); playBip(cfg.bipType,0.5);
-  if(cfg.mode!=='sound') doVibrate([200]);
-  bipTicker=setInterval(()=>{ playBip(cfg.bipType,0.4); if(cfg.mode!=='sound') doVibrate([150]); },2500);
-}
-function stopBips() { if(bipTicker){clearInterval(bipTicker);bipTicker=null;} }
+function doVibrate(p){ if('vibrate' in navigator) navigator.vibrate(p); }
+function alertBip(){ playBip(cfg.bipType,0.9); if(cfg.mode!=='sound') doVibrate([100,50,100]); }
+function doneBip(){ playBip('chime',0.8); if(cfg.mode!=='sound') doVibrate([200,100,200,100,300]); }
+function startOvertimeBips(){ stopBips(); playBip(cfg.bipType,0.5); if(cfg.mode!=='sound') doVibrate([200]); bipTicker=setInterval(()=>{playBip(cfg.bipType,0.4);if(cfg.mode!=='sound') doVibrate([150]);},2500); }
+function stopBips(){ if(bipTicker){clearInterval(bipTicker);bipTicker=null;} }
 
-// ─── UI HELPERS ───────────────────────────────────────────
-function setRing(left,total,color) {
-  const pct=total>0?Math.max(0,left/total):0;
-  $('ring-track').setAttribute('stroke-dashoffset',(CIRC*(1-pct)).toFixed(1));
-  if(color) $('ring-track').setAttribute('stroke',color);
-}
-function setBadge(txt,cls){ const b=$('phase-badge'); b.textContent=txt; b.className='phase-badge '+cls; }
-function setAvatar(txt,cls){ const a=$('speaker-avatar'); a.textContent=txt; a.className='speaker-avatar '+(cls||''); }
+// ─── UI ───────────────────────────────────────────────────
+function fmt(s){ if(s<0){const a=-s;return '-'+Math.floor(a/60)+':'+(a%60<10?'0':'')+a%60;} return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
+function setRing(left,total,color){ const pct=total>0?Math.max(0,left/total):0; $('ring-track').setAttribute('stroke-dashoffset',(CIRC*(1-pct)).toFixed(1)); if(color) $('ring-track').setAttribute('stroke',color); }
+function setBadge(txt,cls){ const b=$('phase-badge');b.textContent=txt;b.className='phase-badge '+cls; }
+function setAvatar(txt,cls){ const a=$('speaker-avatar');a.textContent=txt;a.className='speaker-avatar '+(cls||''); }
 
-function showButtons(mode) {
-  // mode: 'idle' | 'speaking' | 'silence' | 'paused-speaking' | 'paused-silence'
-  const bs=$('btn-start'), bt=$('btn-stop'), bp=$('btn-pause');
-  if (mode==='idle') {
-    bs.style.display='flex'; bs.classList.add('btn-full'); bs.disabled=false;
+function showButtons(mode){
+  const bs=$('btn-start'),bt=$('btn-stop'),bp=$('btn-pause');
+  if(mode==='idle'){
+    bs.style.display='flex';bs.classList.add('btn-full');bs.disabled=false;
     bs.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Démarrer`;
-    bt.style.display='none'; bp.style.display='none';
-  } else if (mode==='speaking') {
+    bt.style.display='none';bp.style.display='none';
+  } else if(mode==='speaking'){
     bs.style.display='none';
-    bt.style.display='flex'; bt.classList.remove('btn-full'); bt.disabled=false;
+    bt.style.display='flex';bt.classList.remove('btn-full');bt.disabled=false;
     bt.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`;
-    bp.style.display='flex'; bp.disabled=false;
+    bp.style.display='flex';bp.disabled=false;
     bp.innerHTML=`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
-  } else if (mode==='silence') {
-    // Démarrer (= terminer silence + démarrer suivant) + Terminer silence + Pause
-    bs.style.display='flex'; bs.classList.remove('btn-full'); bs.disabled=false;
+  } else if(mode==='silence'){
+    bs.style.display='flex';bs.classList.remove('btn-full');bs.disabled=false;
     bs.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Suivant`;
-    bt.style.display='flex'; bt.disabled=false;
+    bt.style.display='flex';bt.disabled=false;
     bt.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`;
-    bp.style.display='flex'; bp.disabled=false;
+    bp.style.display='flex';bp.disabled=false;
     bp.innerHTML=`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
-  } else if (mode==='paused') {
-    // keep stop hidden or visible depending on savedState
-    bs.style.display='none';
-    bt.style.display= savedState==='silence'?'flex':'none'; bt.disabled=false;
-    bp.style.display='flex'; bp.disabled=false;
+  } else if(mode==='paused'){
+    bs.style.display=savedState==='silence'?'flex':'none';
+    if(savedState==='silence'){bs.classList.remove('btn-full');bs.disabled=false;bs.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Suivant`;}
+    bt.style.display=savedState==='silence'?'flex':'none';bt.disabled=false;
+    bp.style.display='flex';bp.disabled=false;
     bp.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Reprendre`;
-    if(savedState==='silence'){
-      bs.style.display='flex'; bs.classList.remove('btn-full'); bs.disabled=false;
-      bs.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Suivant`;
-    }
-  } else if (mode==='done') {
-    bs.style.display='none'; bt.style.display='none'; bp.style.display='none';
+    if(savedState!=='silence'){ bp.classList.add('btn-full'); } else { bp.classList.remove('btn-full'); }
+  } else if(mode==='done'){
+    bs.style.display='none';bt.style.display='none';bp.style.display='none';
   }
 }
 
-function refreshStrip() {
-  const s=$('people-strip'); s.innerHTML='';
+function refreshStrip(){
+  const s=$('people-strip');s.innerHTML='';
   for(let i=0;i<totalPeople;i++){
     const d=document.createElement('div');
     const done=donePeople.includes(i);
@@ -396,7 +447,9 @@ function refreshStrip() {
     d.textContent='P'+(i+1);
     s.appendChild(d);
   }
+  resize(); // re-adapt dot sizes
 }
+
 function updateModePill(){
   const icons={sound:'🔊',vibrate:'📳',both:'🔊📳',silent:'🔇'};
   $('mode-pill').textContent=icons[cfg.mode]||'🔊';
@@ -404,7 +457,7 @@ function updateModePill(){
 }
 
 // ─── TICK ─────────────────────────────────────────────────
-function tick() {
+function tick(){
   timeLeft--;
   $('timer-display').textContent=fmt(timeLeft);
   if(state==='speaking'){
@@ -422,19 +475,19 @@ function tick() {
 }
 
 function enterOvertime(){
-  state='overtime'; timeLeft=0;
+  state='overtime';timeLeft=0;
   setRing(0,totalTime,'#D85A30');
   setBadge('⚠ Temps dépassé','phase-badge badge-overtime');
   $('timer-display').className='timer-time overtime';
   $('timer-label').textContent='dépassé';
-  startOvertimeBips(); refreshStrip();
+  startOvertimeBips();refreshStrip();
   clearInterval(ticker);
   ticker=setInterval(()=>{timeLeft--;$('timer-display').textContent=fmt(timeLeft);},1000);
 }
 
 function enterSilence(){
-  stopBips(); clearInterval(ticker);
-  state='silence'; totalTime=cfg.silence; timeLeft=cfg.silence;
+  stopBips();clearInterval(ticker);
+  state='silence';totalTime=cfg.silence;timeLeft=cfg.silence;
   $('timer-display').textContent=fmt(timeLeft);
   $('timer-display').className='timer-time';
   $('timer-label').textContent='silence';
@@ -443,12 +496,12 @@ function enterSilence(){
   $('speaker-name').textContent='Silence';
   $('speaker-sub').textContent='Laissez décanter…';
   setRing(timeLeft,totalTime,'var(--purple)');
-  showButtons('silence'); refreshStrip();
+  showButtons('silence');refreshStrip();
   ticker=setInterval(tick,1000);
 }
 
 function endSilence(){
-  clearInterval(ticker); ticker=null;
+  clearInterval(ticker);ticker=null;
   donePeople.push(currentPerson);
   let next=(currentPerson+1)%totalPeople;
   while(donePeople.includes(next)&&donePeople.length<totalPeople) next=(next+1)%totalPeople;
@@ -458,7 +511,7 @@ function endSilence(){
 }
 
 function prepareIdle(){
-  state='idle'; totalTime=cfg.parole; timeLeft=totalTime;
+  state='idle';totalTime=cfg.parole;timeLeft=totalTime;
   $('timer-display').textContent=fmt(timeLeft);
   $('timer-display').className='timer-time';
   $('timer-label').textContent='temps de parole';
@@ -467,26 +520,25 @@ function prepareIdle(){
   setAvatar('P'+(currentPerson+1));
   $('speaker-name').textContent='Personne '+(currentPerson+1);
   $('speaker-sub').textContent='Tour '+(donePeople.length+1)+' sur '+totalPeople;
-  showButtons('idle'); refreshStrip();
+  showButtons('idle');refreshStrip();
 }
 
 function showAllDone(){
-  state='done'; doneBip();
+  state='done';doneBip();
   setBadge('✓ Tour terminé','phase-badge badge-speaking');
   setAvatar('✓');
   $('speaker-name').textContent='Tour complet !';
   $('speaker-sub').textContent='Toutes les personnes ont parlé';
   $('timer-display').textContent='—';
   setRing(0,1,'var(--green)');
-  showButtons('done'); refreshStrip();
+  showButtons('done');refreshStrip();
 }
 
-// ─── BUTTON HANDLERS ──────────────────────────────────────
+// ─── HANDLERS ─────────────────────────────────────────────
 function handleStart(){
   try{getCtx().resume();}catch(e){}
   if(state==='idle'){
-    // start speaking
-    state='speaking'; alertFired=false; totalTime=cfg.parole; timeLeft=totalTime;
+    state='speaking';alertFired=false;totalTime=cfg.parole;timeLeft=totalTime;
     $('timer-display').textContent=fmt(timeLeft);
     $('timer-display').className='timer-time';
     $('timer-label').textContent='temps de parole';
@@ -495,22 +547,16 @@ function handleStart(){
     setAvatar('P'+(currentPerson+1));
     $('speaker-name').textContent='Personne '+(currentPerson+1);
     $('speaker-sub').textContent='Tour '+(donePeople.length+1)+' sur '+totalPeople;
-    showButtons('speaking'); refreshStrip();
+    showButtons('speaking');refreshStrip();
     ticker=setInterval(tick,1000);
   } else if(state==='silence'){
-    // skip silence → go to next person
-    clearInterval(ticker); ticker=null; stopBips();
-    endSilence();
+    clearInterval(ticker);ticker=null;stopBips();endSilence();
   }
 }
 
 function handleStop(){
-  if(state==='speaking'||state==='overtime'){
-    clearInterval(ticker); ticker=null; stopBips(); enterSilence();
-  } else if(state==='silence'){
-    // end silence early, go to idle for next person
-    clearInterval(ticker); ticker=null; stopBips(); endSilence();
-  }
+  if(state==='speaking'||state==='overtime'){ clearInterval(ticker);ticker=null;stopBips();enterSilence(); }
+  else if(state==='silence'){ clearInterval(ticker);ticker=null;stopBips();endSilence(); }
 }
 
 function handlePause(){
@@ -518,20 +564,20 @@ function handlePause(){
     state=savedState;
     if(state==='overtime') startOvertimeBips();
     ticker=setInterval(tick,1000);
-    setBadge(state==='silence'?'🤫 Silence':'🎤 Parole', state==='silence'?'phase-badge badge-silence':'phase-badge badge-speaking');
+    setBadge(state==='silence'?'🤫 Silence':'🎤 Parole',state==='silence'?'phase-badge badge-silence':'phase-badge badge-speaking');
     showButtons(state==='silence'?'silence':'speaking');
   } else if(state==='speaking'||state==='overtime'||state==='silence'){
-    savedState=state; state='paused';
-    clearInterval(ticker); ticker=null; stopBips();
+    savedState=state;state='paused';
+    clearInterval(ticker);ticker=null;stopBips();
     setBadge('⏸ Pause','phase-badge badge-idle');
     showButtons('paused');
   }
 }
 
 function handleReset(){
-  clearInterval(ticker); ticker=null; stopBips();
-  state='idle'; currentPerson=0; donePeople=[]; alertFired=false; savedState=null;
-  totalTime=cfg.parole; timeLeft=totalTime;
+  clearInterval(ticker);ticker=null;stopBips();
+  state='idle';currentPerson=0;donePeople=[];alertFired=false;savedState=null;
+  totalTime=cfg.parole;timeLeft=totalTime;
   $('timer-display').textContent=fmt(timeLeft);
   $('timer-display').className='timer-time';
   $('timer-label').textContent='temps de parole';
@@ -540,26 +586,15 @@ function handleReset(){
   setAvatar('?','idle');
   $('speaker-name').textContent='—';
   $('speaker-sub').textContent='Appuyer sur Démarrer';
-  showButtons('idle'); refreshStrip();
+  showButtons('idle');refreshStrip();
 }
 
 // ─── SETTINGS ─────────────────────────────────────────────
 function openSettings(){ $('settings-panel').classList.add('open'); }
 function closeSettings(){ $('settings-panel').classList.remove('open'); }
-function updateMode(v){ cfg.mode=v; updateModePill(); }
-
-function onBipChange(v){
-  cfg.bipType=v;
-  // auto-preview on selection
-  try{getCtx().resume();}catch(e){}
-  playBip(v,0.9);
-}
-
-function updateSetting(key,val){
-  cfg[key]=val;
-  if(key==='silence') $('sv-silence').textContent=val+' s';
-  if(key==='alert')   $('sv-alert').textContent=val+' s';
-}
+function updateMode(v){ cfg.mode=v;updateModePill(); }
+function onBipChange(v){ cfg.bipType=v; try{getCtx().resume();}catch(e){} playBip(v,0.9); }
+function updateSetting(key,val){ cfg[key]=val; if(key==='silence') $('sv-silence').textContent=val+' s'; if(key==='alert') $('sv-alert').textContent=val+' s'; }
 function updateParoleDisplay(){
   const min=parseInt($('s-parole-min').value)||1;
   const sec=parseInt($('s-parole-sec').value)*30;
@@ -572,15 +607,16 @@ function changePeople(d){
   totalPeople=Math.max(2,Math.min(10,totalPeople+d));
   $('people-val').textContent=totalPeople;
   if(state==='idle'){donePeople=[];currentPerson=0;refreshStrip();}
+  resize();
 }
 
 // ─── INIT ─────────────────────────────────────────────────
-$('s-parole-min').value=3; $('s-parole-sec').value=0;
-$('s-silence').value=60; $('s-alert').value=15;
-$('sv-parole').textContent='3 min'; $('sv-parole-sec').textContent='non';
-$('sv-silence').textContent='60 s'; $('sv-alert').textContent='15 s';
+$('s-parole-min').value=3;$('s-parole-sec').value=0;
+$('s-silence').value=60;$('s-alert').value=15;
+$('sv-parole').textContent='3 min';$('sv-parole-sec').textContent='non';
+$('sv-silence').textContent='60 s';$('sv-alert').textContent='15 s';
 $('people-val').textContent=totalPeople;
-updateModePill(); handleReset();
+updateModePill();handleReset();
 
 if('wakeLock' in navigator){
   navigator.wakeLock.request('screen').catch(()=>{});
