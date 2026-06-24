@@ -2,9 +2,10 @@
   "name": "Cercle de parole",
   "short_name": "Cercle",
   "description": "Chronomètre de parole pour groupes",
-  "start_url": "/",
+  "start_url": "/cercle-parole/",
+  "scope": "/cercle-parole/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "theme_color": "#1D9E75",
   "background_color": "#F1EFE8",
   "icons": [

@@ -370,7 +370,7 @@
       <div class="credits-block">
         <strong>Cyrille Gindre</strong><br>
         <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-        Version <span class="version-badge">V02</span> — 24/06/2026<br><br>
+        Version <span class="version-badge">V03</span> — 24/06/2026<br><br>
         <strong>Lien de téléchargement :</strong><br>
         <a href="https://cyrille31.github.io/cercle-parole/" target="_blank">cyrille31.github.io/cercle-parole</a>
       </div>
@@ -456,7 +456,7 @@ function playBip(type,vol){
   }catch(e){}
 }
 function doVibrate(p){ if('vibrate' in navigator) navigator.vibrate(p); }
-function alertBip(){ playBip(cfg.bipType,0.9);if(cfg.mode!=='sound') doVibrate([100,50,100]); }
+function alertBip(){ playBip(cfg.bipType,0.9); setTimeout(()=>playBip(cfg.bipType,0.9),300); if(cfg.mode!=='sound') doVibrate([100,50,100,50,100]); }
 function doneBip(){ playBip('chime',0.8);if(cfg.mode!=='sound') doVibrate([200,100,200,100,300]); }
 function startOvertimeBips(){
   stopBips(); playBip(cfg.bipType,0.5);
@@ -555,7 +555,7 @@ function tick(){
   $('timer-display').textContent=fmt(timeLeft);
   const col=currentTour===1?'var(--green)':'var(--orange)';
   if(state==='speaking'){
-    if(!alertFired&&timeLeft===cfg.alert){alertFired=true;alertBip();}
+    if(!alertFired&&timeLeft<=cfg.alert&&timeLeft>0){alertFired=true;alertBip();}
     if(timeLeft<=0){enterOvertime();return;}
     setRing(timeLeft,totalTime,col);
     $('timer-display').className='timer-time';
