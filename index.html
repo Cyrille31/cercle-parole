@@ -16,180 +16,211 @@
     --green:#1D9E75;--green-light:#9FE1CB;--green-dark:#0F6E56;--green-bg:#E1F5EE;
     --purple:#7F77DD;--purple-bg:#EEEDFE;--purple-dark:#3C3489;
     --gray-bg:#F1EFE8;--gray:#888780;
+    --orange:#E07B20;--orange-bg:#FDF0E0;--orange-dark:#A05010;
     --red:#D85A30;--red-bg:#FAECE7;--red-dark:#993C1D;
     --text:#1a1a1a;--text-muted:#666;--border:rgba(0,0,0,0.12);
-    --surface:#fff;--surface2:#f7f7f5;--radius:14px;--radius-sm:8px;
+    --surface:#fff;--surface2:#f7f7f5;--radius:12px;--radius-sm:8px;
+    /* safe areas */
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
   }
   @media (prefers-color-scheme:dark){
     :root{--text:#f0f0f0;--text-muted:#aaa;--border:rgba(255,255,255,0.12);
     --surface:#1c1c1e;--surface2:#2c2c2e;--gray-bg:#2c2c2e;
-    --green-bg:#0a3328;--purple-bg:#1e1b4b;--red-bg:#3b1a0f;}
+    --green-bg:#0a3328;--purple-bg:#1e1b4b;--red-bg:#3b1a0f;--orange-bg:#2a1a05;}
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-
-  /* Full screen, no scroll */
   html,body{
-    height:100%; width:100%;
+    height:100%;width:100%;
     overflow:hidden;
     touch-action:manipulation;
-  }
-  body{
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     background:var(--surface2);color:var(--text);
-    display:flex;justify-content:center;align-items:stretch;
   }
+  body{display:flex;justify-content:center;align-items:stretch;}
 
   #app{
-    width:100%; max-width:430px;
+    width:100%;max-width:500px;
     height:100%;
-    display:flex; flex-direction:column;
+    display:flex;flex-direction:column;
     background:var(--surface2);
-    position:relative; overflow:hidden;
+    position:relative;overflow:hidden;
   }
 
-  /* TOPBAR — fixed small height */
+  /* TOPBAR */
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
-    padding:0 16px;
-    height:52px;
-    padding-top:env(safe-area-inset-top);
+    padding:0 14px;
+    height:calc(48px + var(--sat));
+    padding-top:var(--sat);
     background:var(--surface);
     border-bottom:0.5px solid var(--border);
     flex-shrink:0;
   }
-  .topbar h1{font-size:16px;font-weight:600}
+  .topbar h1{font-size:15px;font-weight:600;white-space:nowrap}
   .icon-btn{width:34px;height:34px;border-radius:50%;border:none;background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0}
   .icon-btn:active{background:var(--border)}
-  .mode-pill{font-size:11px;font-weight:600;padding:2px 7px;border-radius:12px;border:0.5px solid var(--border);color:var(--text-muted);background:var(--surface2)}
+  .mode-pill{font-size:11px;font-weight:600;padding:2px 6px;border-radius:10px;border:0.5px solid var(--border);color:var(--text-muted);background:var(--surface2);white-space:nowrap}
 
-  /* MAIN — fills all remaining space, no scroll */
+  /* TOUR SWITCHER */
+  .tour-switcher{
+    display:flex;align-items:center;
+    background:var(--surface);
+    border-bottom:0.5px solid var(--border);
+    flex-shrink:0;
+    padding:0 14px;
+    height:40px;
+    gap:8px;
+  }
+  .tour-btn{
+    flex:1;height:28px;border-radius:20px;border:1.5px solid var(--border);
+    background:var(--surface2);color:var(--text-muted);
+    font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;
+    display:flex;align-items:center;justify-content:center;gap:4px;
+  }
+  .tour-btn.active-t1{background:var(--green-bg);color:var(--green-dark);border-color:var(--green);}
+  .tour-btn.active-t2{background:var(--orange-bg);color:var(--orange-dark);border-color:var(--orange);}
+  .tour-label{font-size:11px;color:var(--text-muted);white-space:nowrap;flex-shrink:0}
+
+  /* MAIN — fills remaining space, no scroll */
   .main{
-    flex:1;
-    min-height:0;
+    flex:1;min-height:0;
     display:flex;flex-direction:column;align-items:center;
     justify-content:space-evenly;
-    padding:0 16px;
-    padding-bottom:max(8px,env(safe-area-inset-bottom));
+    padding:4px 14px;
+    padding-bottom:calc(max(6px, var(--sab)) + 2px);
     overflow:hidden;
   }
 
   /* BADGE */
-  .phase-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:0.3px;white-space:nowrap}
+  .phase-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.3px;white-space:nowrap}
   .badge-idle{background:var(--gray-bg);color:var(--gray)}
-  .badge-speaking{background:var(--green-bg);color:var(--green-dark)}
+  .badge-t1{background:var(--green-bg);color:var(--green-dark)}
+  .badge-t2{background:var(--orange-bg);color:var(--orange-dark)}
   .badge-overtime{background:var(--red-bg);color:var(--red-dark)}
   .badge-silence{background:var(--purple-bg);color:var(--purple-dark)}
 
   /* PEOPLE */
-  .people-strip{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:100%}
+  .people-strip{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;width:100%}
   .pdot{
-    /* size set by JS based on available space */
-    width:var(--dot-size,36px); height:var(--dot-size,36px);
+    width:var(--dot-size,34px);height:var(--dot-size,34px);
     border-radius:50%;display:flex;align-items:center;justify-content:center;
     font-size:11px;font-weight:600;border:2px solid transparent;
     transition:all 0.2s;user-select:none;flex-shrink:0;
   }
   .pdot-waiting{background:var(--surface2);color:var(--text-muted);border-color:var(--border)}
-  .pdot-active{background:var(--green);color:#fff;border-color:var(--green-dark);box-shadow:0 0 0 3px var(--green-bg)}
+  .pdot-active-t1{background:var(--green);color:#fff;border-color:var(--green-dark);box-shadow:0 0 0 3px var(--green-bg)}
+  .pdot-active-t2{background:var(--orange);color:#fff;border-color:var(--orange-dark);box-shadow:0 0 0 3px var(--orange-bg)}
   .pdot-done{background:var(--green-bg);color:var(--green-dark);border-color:var(--green-light)}
+  .pdot-done-t2{background:var(--orange-bg);color:var(--orange-dark);border-color:var(--orange)}
   .pdot-overtime{background:var(--red-bg);color:var(--red-dark);border-color:var(--red);box-shadow:0 0 0 3px rgba(216,90,48,0.15)}
 
-  /* TIMER — fluid size via CSS variable set by JS */
+  /* TIMER */
   .timer-wrap{
     position:relative;
-    width:var(--ring-size,240px); height:var(--ring-size,240px);
+    width:var(--ring-size,200px);height:var(--ring-size,200px);
     flex-shrink:0;
   }
   .timer-wrap svg{position:absolute;top:0;left:0;width:100%;height:100%}
-  .timer-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:100%}
-  .timer-time{
-    font-size:var(--time-font,56px);
-    font-weight:300;letter-spacing:-3px;color:var(--text);line-height:1;
-    font-variant-numeric:tabular-nums;
-  }
+  .timer-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:90%}
+  .timer-time{font-size:var(--time-font,52px);font-weight:300;letter-spacing:-3px;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
   .timer-time.overtime{color:var(--red)}
-  .timer-label{font-size:var(--label-font,12px);color:var(--text-muted);margin-top:6px}
+  .timer-label{font-size:var(--label-font,11px);color:var(--text-muted);margin-top:4px}
 
   /* SPEAKER CARD */
-  .speaker-card{
-    width:100%;background:var(--surface);border:0.5px solid var(--border);
-    border-radius:var(--radius);padding:10px 14px;
-    display:flex;align-items:center;gap:10px;flex-shrink:0;
-  }
-  .speaker-avatar{
-    width:var(--avatar-size,40px);height:var(--avatar-size,40px);
-    border-radius:50%;background:var(--green-bg);color:var(--green-dark);
-    display:flex;align-items:center;justify-content:center;
-    font-size:16px;font-weight:600;flex-shrink:0;
-  }
+  .speaker-card{width:100%;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .speaker-avatar{width:var(--avatar-size,36px);height:var(--avatar-size,36px);border-radius:50%;background:var(--green-bg);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0;}
+  .speaker-avatar.t2{background:var(--orange-bg);color:var(--orange-dark)}
   .speaker-avatar.silence{background:var(--purple-bg);color:var(--purple-dark)}
   .speaker-avatar.idle{background:var(--gray-bg);color:var(--gray)}
-  .speaker-name{font-size:var(--card-font,14px);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .speaker-name{font-size:var(--card-font,13px);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .speaker-sub{font-size:var(--card-sub,11px);color:var(--text-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* BUTTONS */
-  .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+  .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%}
   .btn{
-    padding:0; height:var(--btn-h,50px);
+    padding:0;height:var(--btn-h,46px);
     border-radius:var(--radius);border:0.5px solid var(--border);
-    font-size:var(--btn-font,14px);font-weight:600;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;gap:6px;
+    font-size:var(--btn-font,13px);font-weight:600;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:5px;
     transition:all 0.12s;background:var(--surface);color:var(--text);
-    -webkit-user-select:none;user-select:none;
+    -webkit-user-select:none;user-select:none;white-space:nowrap;
   }
   .btn:active:not(:disabled){transform:scale(0.96)}
   .btn:disabled{opacity:0.35;cursor:default}
-  .btn-primary{background:var(--green);color:#fff;border-color:var(--green-dark)}
-  .btn-primary:active:not(:disabled){background:var(--green-dark)}
+  .btn-green{background:var(--green);color:#fff;border-color:var(--green-dark)}
+  .btn-green:active:not(:disabled){background:var(--green-dark)}
+  .btn-orange{background:var(--orange);color:#fff;border-color:var(--orange-dark)}
+  .btn-orange:active:not(:disabled){background:var(--orange-dark)}
   .btn-full{grid-column:1/-1}
-  .btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 
   /* LOGO */
-  .logo-watermark{position:absolute;bottom:max(6px,env(safe-area-inset-bottom));left:10px;opacity:0.45;z-index:5;pointer-events:none}
-  .logo-watermark img{height:22px;width:auto;display:block}
+  .logo-watermark{position:absolute;bottom:calc(max(5px,var(--sab)) + 2px);left:calc(8px + var(--sal));opacity:0.4;z-index:5;pointer-events:none}
+  .logo-watermark img{height:20px;width:auto;display:block}
 
   /* PULSE */
   @keyframes beep-pulse{0%,100%{box-shadow:0 0 0 0 rgba(216,90,48,0)}50%{box-shadow:0 0 0 10px rgba(216,90,48,0.2)}}
   .pulsing{animation:beep-pulse 2s infinite}
 
   /* SETTINGS PANEL */
-  #settings-panel{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--surface2);z-index:10;overflow-y:auto;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);padding-bottom:max(40px,env(safe-area-inset-bottom))}
+  #settings-panel{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--surface2);z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);padding-bottom:max(40px,var(--sab))}
   #settings-panel.open{transform:translateX(0)}
-  .settings-topbar{display:flex;align-items:center;gap:12px;padding:14px 20px;padding-top:max(14px,env(safe-area-inset-top));background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:1}
-  .settings-topbar h2{font-size:17px;font-weight:600}
-  .settings-section{background:var(--surface);border-radius:var(--radius);margin:16px 16px 0;overflow:hidden;border:0.5px solid var(--border)}
-  .settings-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);padding:12px 16px 4px}
-  .settings-row{display:flex;align-items:center;padding:10px 16px;gap:12px;border-top:0.5px solid var(--border)}
+  .settings-topbar{display:flex;align-items:center;gap:12px;padding:12px 16px;padding-top:calc(12px + var(--sat));background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:1}
+  .settings-topbar h2{font-size:16px;font-weight:600}
+  .settings-section{background:var(--surface);border-radius:var(--radius);margin:14px 14px 0;overflow:hidden;border:0.5px solid var(--border)}
+  .settings-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);padding:11px 14px 4px}
+  .settings-row{display:flex;align-items:center;padding:10px 14px;gap:10px;border-top:0.5px solid var(--border)}
   .settings-row:first-of-type{border-top:none}
-  .settings-row label{font-size:14px;flex:1}
-  .settings-row .val{font-size:14px;font-weight:600;color:var(--green);min-width:44px;text-align:right}
-  input[type=range]{-webkit-appearance:none;appearance:none;width:100px;height:4px;border-radius:2px;background:var(--border);outline:none}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
-  select{font-size:13px;padding:6px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface2);color:var(--text);outline:none;flex:1}
+  .settings-row label{font-size:13px;flex:1}
+  .settings-row .val{font-size:13px;font-weight:600;color:var(--green);min-width:44px;text-align:right}
+  .settings-row .val.orange{color:var(--orange)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:90px;height:4px;border-radius:2px;background:var(--border);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+  input[type=range].orange-thumb::-webkit-slider-thumb{background:var(--orange)}
+  select{font-size:13px;padding:5px 8px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface2);color:var(--text);outline:none;flex:1}
   .stepper{display:flex;align-items:center;gap:8px}
-  .step-btn{width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .step-btn{width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
   .step-btn:active{background:var(--border)}
-  .step-val{font-size:18px;font-weight:600;min-width:28px;text-align:center}
-  .credits-block{padding:12px 16px;line-height:1.8;font-size:13px;color:var(--text-muted)}
+  .step-val{font-size:17px;font-weight:600;min-width:26px;text-align:center}
+  .credits-block{padding:12px 14px;line-height:1.8;font-size:13px;color:var(--text-muted)}
   .credits-block strong{color:var(--text);font-weight:600}
   .credits-block a{color:var(--green);text-decoration:none}
+  .version-badge{display:inline-block;background:var(--green-bg);color:var(--green-dark);border-radius:8px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px}
 </style>
 </head>
 <body>
 <div id="app">
+  <!-- TOPBAR -->
   <div class="topbar">
     <button class="icon-btn" onclick="handleReset()" aria-label="Réinitialiser">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
-    <div style="display:flex;align-items:center;gap:7px">
+    <div style="display:flex;align-items:center;gap:6px">
       <h1>Cercle de parole</h1>
       <span class="mode-pill" id="mode-pill">🔊</span>
     </div>
     <button class="icon-btn" onclick="openSettings()" aria-label="Réglages">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0m14.14 14.14a10 10 0 0 1-14.14 0"/></svg>
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0m14.14 14.14a10 10 0 0 1-14.14 0"/></svg>
     </button>
   </div>
 
+  <!-- TOUR SWITCHER -->
+  <div class="tour-switcher">
+    <span class="tour-label">Tour :</span>
+    <button class="tour-btn active-t1" id="t1-btn" onclick="switchTour(1)">
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>
+      1er tour
+    </button>
+    <button class="tour-btn" id="t2-btn" onclick="switchTour(2)">
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>
+      2e tour
+    </button>
+  </div>
+
+  <!-- MAIN -->
   <div class="main" id="main">
     <div id="phase-badge" class="phase-badge badge-idle">⏸ En attente</div>
     <div class="people-strip" id="people-strip"></div>
@@ -213,10 +244,10 @@
       </div>
     </div>
     <div class="btn-grid" id="btn-grid">
-      <button class="btn btn-primary btn-full" id="btn-start" onclick="handleStart()">
+      <button class="btn btn-green btn-full" id="btn-start" onclick="handleStart()">
         <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Démarrer
       </button>
-      <button class="btn btn-primary" id="btn-stop" onclick="handleStop()" disabled style="display:none">
+      <button class="btn btn-green" id="btn-stop" onclick="handleStop()" disabled style="display:none">
         <svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer
       </button>
       <button class="btn" id="btn-pause" onclick="handlePause()" disabled style="display:none">
@@ -229,14 +260,15 @@
     <img src="icons/logo_cgexcel.jpg" alt="CGExcel">
   </div>
 
-  <!-- SETTINGS -->
+  <!-- SETTINGS PANEL -->
   <div id="settings-panel">
     <div class="settings-topbar">
       <button class="icon-btn" onclick="closeSettings()">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <h2>Réglages</h2>
     </div>
+
     <div class="settings-section">
       <div class="settings-section-title">Participants</div>
       <div class="settings-row">
@@ -248,29 +280,63 @@
         </div>
       </div>
     </div>
+
     <div class="settings-section">
-      <div class="settings-section-title">Durées</div>
+      <div class="settings-section-title" style="color:var(--green-dark)">🟢 1er tour — durées</div>
       <div class="settings-row">
         <label>Parole (minutes)</label>
-        <input type="range" min="1" max="20" step="1" id="s-parole-min" oninput="updateParoleDisplay()">
-        <span class="val" id="sv-parole">3 min</span>
+        <input type="range" min="1" max="5" step="1" id="s1-parole-min" oninput="updateParole(1)">
+        <span class="val" id="sv1-parole">3 min</span>
       </div>
       <div class="settings-row">
         <label>+ 30 secondes</label>
-        <input type="range" min="0" max="1" step="1" id="s-parole-sec" oninput="updateParoleDisplay()">
-        <span class="val" id="sv-parole-sec">non</span>
+        <input type="range" min="0" max="1" step="1" id="s1-parole-sec" oninput="updateParole(1)">
+        <span class="val" id="sv1-parole-sec">non</span>
       </div>
       <div class="settings-row">
         <label>Silence (secondes)</label>
-        <input type="range" min="15" max="120" step="15" id="s-silence" oninput="updateSetting('silence',+this.value)">
-        <span class="val" id="sv-silence">60 s</span>
-      </div>
-      <div class="settings-row">
-        <label>Alerte avant fin</label>
-        <input type="range" min="5" max="30" step="5" id="s-alert" oninput="updateSetting('alert',+this.value)">
-        <span class="val" id="sv-alert">15 s</span>
+        <input type="range" min="15" max="120" step="15" id="s1-silence" oninput="updateSilence(1,+this.value)">
+        <span class="val" id="sv1-silence">60 s</span>
       </div>
     </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title" style="color:var(--orange-dark)">🟠 2e tour — durées</div>
+      <div class="settings-row">
+        <label>Parole (minutes)</label>
+        <input type="range" min="1" max="5" step="1" id="s2-parole-min" oninput="updateParole(2)" class="orange-thumb">
+        <span class="val orange" id="sv2-parole">2 min</span>
+      </div>
+      <div class="settings-row">
+        <label>+ 30 secondes</label>
+        <input type="range" min="0" max="1" step="1" id="s2-parole-sec" oninput="updateParole(2)" class="orange-thumb">
+        <span class="val orange" id="sv2-parole-sec">non</span>
+      </div>
+      <div class="settings-row">
+        <label>Silence (secondes)</label>
+        <input type="range" min="15" max="120" step="15" id="s2-silence" oninput="updateSilence(2,+this.value)" class="orange-thumb">
+        <span class="val orange" id="sv2-silence">60 s</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Signal de fin</div>
+      <div class="settings-row">
+        <label>Alerte avant fin</label>
+        <input type="range" min="5" max="30" step="5" id="s-alert" oninput="cfg.alert=+this.value; $('sv-alert').textContent=this.value+' s'">
+        <span class="val" id="sv-alert">15 s</span>
+      </div>
+      <div class="settings-row">
+        <label>Intervalle bip répété</label>
+        <select id="s-bipinterval" onchange="cfg.bipInterval=+this.value">
+          <option value="1">1 seconde</option>
+          <option value="2" selected>2 secondes</option>
+          <option value="5">5 secondes</option>
+          <option value="10">10 secondes</option>
+        </select>
+      </div>
+    </div>
+
     <div class="settings-section">
       <div class="settings-section-title">Mode signal</div>
       <div class="settings-row">
@@ -283,6 +349,7 @@
         </select>
       </div>
     </div>
+
     <div class="settings-section" id="sound-section">
       <div class="settings-section-title">Type de signal sonore</div>
       <div class="settings-row">
@@ -297,12 +364,13 @@
         </select>
       </div>
     </div>
+
     <div class="settings-section">
       <div class="settings-section-title">Crédits</div>
       <div class="credits-block">
         <strong>Cyrille Gindre</strong><br>
         <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-        Version V02 — 23/06/2026<br><br>
+        Version <span class="version-badge">V02</span> — 24/06/2026<br><br>
         <strong>Lien de téléchargement :</strong><br>
         <a href="https://cyrille31.github.io/cercle-parole/" target="_blank">cyrille31.github.io/cercle-parole</a>
       </div>
@@ -311,8 +379,16 @@
 </div>
 
 <script>
-let cfg = { parole:180, silence:60, alert:15, bipType:'soft', mode:'sound' };
+// ─── CONFIG ───────────────────────────────────────────────
+let cfg = {
+  t1: { parole:180, silence:60 },
+  t2: { parole:120, silence:60 },
+  alert:15, bipType:'soft', mode:'sound', bipInterval:2
+};
+let currentTour = 1;
 let totalPeople = 5;
+
+// ─── STATE ────────────────────────────────────────────────
 let state = 'idle';
 let currentPerson = 0, donePeople = [];
 let timeLeft = 0, totalTime = 0;
@@ -322,56 +398,43 @@ let audioCtx = null;
 const $ = id => document.getElementById(id);
 const CIRC = 753.98;
 
+function currentCfg() { return currentTour===1 ? cfg.t1 : cfg.t2; }
+
 // ─── RESPONSIVE LAYOUT ────────────────────────────────────
 function resize() {
-  const topbarH = 52;
-  const safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || 0);
-  const safeBot = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || 0);
-  const totalH = window.innerHeight;
-  const availH = totalH - topbarH - Math.max(8, safeBot);
-  const availW = Math.min(window.innerWidth, 430);
+  const topbarH = 48 + parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat')||'0');
+  const tourH   = 40;
+  const safeBot = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sab')||'0');
+  const availH  = window.innerHeight - topbarH - tourH - Math.max(6, safeBot) - 8;
+  const availW  = Math.min(window.innerWidth, 500) - 28;
 
-  // Fixed elements heights (approximate)
-  const badgeH   = 28;
-  const cardH    = 62;
-  const btnsH    = 58;  // one row of buttons
-  const gaps     = 10 * 5; // space-evenly gaps
-  const stripH   = 44;
-
-  // Remaining height for the ring
+  const badgeH  = 24;
+  const stripH  = 42;
+  const cardH   = 54;
+  const btnsH   = 50;
+  const gaps    = 6 * 5;
   const ringAvail = availH - badgeH - stripH - cardH - btnsH - gaps;
-  const ringMax   = Math.min(ringAvail, availW - 32);
-  const ringSize  = Math.max(120, Math.floor(ringMax));
+  const ringSize  = Math.max(100, Math.min(Math.floor(ringAvail), availW));
 
-  const root = document.documentElement.style;
-  root.setProperty('--ring-size', ringSize + 'px');
-  root.setProperty('--time-font', Math.max(28, Math.floor(ringSize * 0.26)) + 'px');
-  root.setProperty('--label-font', Math.max(10, Math.floor(ringSize * 0.055)) + 'px');
-
-  // Dots
-  const dotSize = Math.max(28, Math.min(40, Math.floor(availW / (totalPeople + 2))));
-  root.setProperty('--dot-size', dotSize + 'px');
-
-  // Avatar & card fonts
-  const avatarSize = Math.max(32, Math.min(44, Math.floor(cardH * 0.65)));
-  root.setProperty('--avatar-size', avatarSize + 'px');
-  root.setProperty('--card-font', Math.max(12, Math.min(15, Math.floor(cardH * 0.22))) + 'px');
-  root.setProperty('--card-sub', Math.max(10, Math.min(12, Math.floor(cardH * 0.17))) + 'px');
-
-  // Button height
-  const btnH = Math.max(42, Math.min(54, Math.floor(btnsH * 0.9)));
-  root.setProperty('--btn-h', btnH + 'px');
-  root.setProperty('--btn-font', Math.max(12, Math.min(15, Math.floor(btnH * 0.28))) + 'px');
+  const R = document.documentElement.style;
+  R.setProperty('--ring-size',  ringSize + 'px');
+  R.setProperty('--time-font',  Math.max(24, Math.floor(ringSize * 0.26)) + 'px');
+  R.setProperty('--label-font', Math.max(9,  Math.floor(ringSize * 0.052)) + 'px');
+  const dot = Math.max(26, Math.min(38, Math.floor(availW / (totalPeople + 2))));
+  R.setProperty('--dot-size', dot + 'px');
+  const av = Math.max(30, Math.min(42, Math.floor(cardH * 0.72)));
+  R.setProperty('--avatar-size', av + 'px');
+  R.setProperty('--card-font',  Math.max(11, Math.min(14, Math.floor(cardH * 0.24))) + 'px');
+  R.setProperty('--card-sub',   Math.max(9,  Math.min(12, Math.floor(cardH * 0.18))) + 'px');
+  const bh = Math.max(38, Math.min(52, Math.floor(btnsH * 0.92)));
+  R.setProperty('--btn-h',    bh + 'px');
+  R.setProperty('--btn-font', Math.max(11, Math.min(14, Math.floor(bh * 0.28))) + 'px');
 }
-
 window.addEventListener('resize', resize);
-resize();
+window.addEventListener('orientationchange', ()=>{ setTimeout(resize, 150); });
 
 // ─── AUDIO ────────────────────────────────────────────────
-function getCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  return audioCtx;
-}
+function getCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
 function playSine(c,freq,vol,dur,t){ const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination); o.type='sine';o.frequency.value=freq; g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur); o.start(t);o.stop(t+dur+0.05); }
 function playWave(c,wave,freq,vol,dur,t){ const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination); o.type=wave;o.frequency.value=freq; g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur); o.start(t);o.stop(t+dur+0.05); }
 function playChirp(c,vol,t){ const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination); o.type='sine'; o.frequency.setValueAtTime(400,t);o.frequency.exponentialRampToValueAtTime(1200,t+0.15); g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.2); o.start(t);o.stop(t+0.25); }
@@ -381,22 +444,44 @@ function playBip(type,vol){
   if(cfg.mode==='vibrate'){doVibrate([80]);return;}
   if(cfg.mode==='both') doVibrate([60]);
   try{
-    const c=getCtx(); c.resume(); const t=c.currentTime;
+    const c=getCtx();c.resume();const t=c.currentTime;
     switch(type){
-      case 'soft':  playSine(c,660,vol,0.25,t); break;
-      case 'beep':  playWave(c,'square',660,vol*0.35,0.18,t); break;
-      case 'bell':  playSine(c,880,vol,0.5,t);playSine(c,1320,vol*0.4,0.4,t+0.01); break;
-      case 'chirp': playChirp(c,vol,t); break;
-      case 'blip':  playSine(c,1000,vol*0.8,0.08,t); break;
-      case 'chime': playSine(c,523,vol*0.7,0.35,t);playSine(c,659,vol*0.7,0.35,t+0.18);playSine(c,784,vol*0.7,0.45,t+0.36); break;
+      case 'soft':  playSine(c,660,vol,0.25,t);break;
+      case 'beep':  playWave(c,'square',660,vol*0.35,0.18,t);break;
+      case 'bell':  playSine(c,880,vol,0.5,t);playSine(c,1320,vol*0.4,0.4,t+0.01);break;
+      case 'chirp': playChirp(c,vol,t);break;
+      case 'blip':  playSine(c,1000,vol*0.8,0.08,t);break;
+      case 'chime': playSine(c,523,vol*0.7,0.35,t);playSine(c,659,vol*0.7,0.35,t+0.18);playSine(c,784,vol*0.7,0.45,t+0.36);break;
     }
   }catch(e){}
 }
 function doVibrate(p){ if('vibrate' in navigator) navigator.vibrate(p); }
-function alertBip(){ playBip(cfg.bipType,0.9); if(cfg.mode!=='sound') doVibrate([100,50,100]); }
-function doneBip(){ playBip('chime',0.8); if(cfg.mode!=='sound') doVibrate([200,100,200,100,300]); }
-function startOvertimeBips(){ stopBips(); playBip(cfg.bipType,0.5); if(cfg.mode!=='sound') doVibrate([200]); bipTicker=setInterval(()=>{playBip(cfg.bipType,0.4);if(cfg.mode!=='sound') doVibrate([150]);},2500); }
+function alertBip(){ playBip(cfg.bipType,0.9);if(cfg.mode!=='sound') doVibrate([100,50,100]); }
+function doneBip(){ playBip('chime',0.8);if(cfg.mode!=='sound') doVibrate([200,100,200,100,300]); }
+function startOvertimeBips(){
+  stopBips(); playBip(cfg.bipType,0.5);
+  if(cfg.mode!=='sound') doVibrate([200]);
+  bipTicker=setInterval(()=>{ playBip(cfg.bipType,0.4); if(cfg.mode!=='sound') doVibrate([150]); }, cfg.bipInterval*1000);
+}
 function stopBips(){ if(bipTicker){clearInterval(bipTicker);bipTicker=null;} }
+
+// ─── TOUR ─────────────────────────────────────────────────
+function switchTour(t){
+  if(state!=='idle') return; // only switch when idle
+  currentTour=t;
+  updateTourUI();
+  handleReset();
+}
+function updateTourUI(){
+  const isT1=currentTour===1;
+  $('t1-btn').className='tour-btn '+(isT1?'active-t1':'');
+  $('t2-btn').className='tour-btn '+(isT1?'':'active-t2');
+  // update start button color
+  const bs=$('btn-start');
+  bs.className=bs.className.replace(/btn-green|btn-orange/g,'').trim()+' '+(isT1?'btn-green':'btn-orange');
+  const ringColor=isT1?'var(--green)':'var(--orange)';
+  $('ring-track').setAttribute('stroke', ringColor);
+}
 
 // ─── UI ───────────────────────────────────────────────────
 function fmt(s){ if(s<0){const a=-s;return '-'+Math.floor(a/60)+':'+(a%60<10?'0':'')+a%60;} return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
@@ -406,30 +491,36 @@ function setAvatar(txt,cls){ const a=$('speaker-avatar');a.textContent=txt;a.cla
 
 function showButtons(mode){
   const bs=$('btn-start'),bt=$('btn-stop'),bp=$('btn-pause');
+  const gc=currentTour===1?'btn-green':'btn-orange';
+  // reset classes
+  [bs,bt].forEach(b=>b.className=b.className.replace(/btn-green|btn-orange/g,'').trim());
   if(mode==='idle'){
-    bs.style.display='flex';bs.classList.add('btn-full');bs.disabled=false;
+    bs.style.display='flex';bs.classList.add('btn-full',gc);bs.disabled=false;
     bs.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Démarrer`;
     bt.style.display='none';bp.style.display='none';
+    bp.classList.remove('btn-full');
   } else if(mode==='speaking'){
-    bs.style.display='none';
-    bt.style.display='flex';bt.classList.remove('btn-full');bt.disabled=false;
+    bs.style.display='none';bs.classList.remove('btn-full');
+    bt.style.display='flex';bt.classList.add(gc);bt.disabled=false;
     bt.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`;
-    bp.style.display='flex';bp.disabled=false;
+    bp.style.display='flex';bp.classList.remove('btn-full');bp.disabled=false;
     bp.innerHTML=`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
   } else if(mode==='silence'){
-    bs.style.display='flex';bs.classList.remove('btn-full');bs.disabled=false;
+    bs.style.display='flex';bs.classList.remove('btn-full');bs.classList.add(gc);bs.disabled=false;
     bs.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Suivant`;
-    bt.style.display='flex';bt.disabled=false;
+    bt.style.display='flex';bt.classList.add(gc);bt.disabled=false;
     bt.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`;
-    bp.style.display='flex';bp.disabled=false;
+    bp.style.display='flex';bp.classList.remove('btn-full');bp.disabled=false;
     bp.innerHTML=`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
   } else if(mode==='paused'){
-    bs.style.display=savedState==='silence'?'flex':'none';
-    if(savedState==='silence'){bs.classList.remove('btn-full');bs.disabled=false;bs.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Suivant`;}
-    bt.style.display=savedState==='silence'?'flex':'none';bt.disabled=false;
+    const isSil=savedState==='silence';
+    bs.style.display=isSil?'flex':'none';
+    if(isSil){bs.classList.remove('btn-full');bs.classList.add(gc);bs.disabled=false;bs.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Suivant`;}
+    bt.style.display=isSil?'flex':'none';
+    if(isSil){bt.classList.add(gc);bt.disabled=false;}
     bp.style.display='flex';bp.disabled=false;
     bp.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Reprendre`;
-    if(savedState!=='silence'){ bp.classList.add('btn-full'); } else { bp.classList.remove('btn-full'); }
+    if(!isSil){bp.classList.add('btn-full');}else{bp.classList.remove('btn-full');}
   } else if(mode==='done'){
     bs.style.display='none';bt.style.display='none';bp.style.display='none';
   }
@@ -437,17 +528,19 @@ function showButtons(mode){
 
 function refreshStrip(){
   const s=$('people-strip');s.innerHTML='';
+  const ac=currentTour===1?'pdot-active-t1':'pdot-active-t2';
+  const dc=currentTour===1?'pdot-done':'pdot-done-t2';
   for(let i=0;i<totalPeople;i++){
     const d=document.createElement('div');
     const done=donePeople.includes(i);
     const active=!done&&state!=='idle'&&i===currentPerson;
     const over=active&&state==='overtime';
-    d.className='pdot '+(done?'pdot-done':over?'pdot-overtime':active?'pdot-active':'pdot-waiting');
+    d.className='pdot '+(done?dc:over?'pdot-overtime':active?ac:'pdot-waiting');
     if(over) d.classList.add('pulsing');
     d.textContent='P'+(i+1);
     s.appendChild(d);
   }
-  resize(); // re-adapt dot sizes
+  resize();
 }
 
 function updateModePill(){
@@ -460,10 +553,11 @@ function updateModePill(){
 function tick(){
   timeLeft--;
   $('timer-display').textContent=fmt(timeLeft);
+  const col=currentTour===1?'var(--green)':'var(--orange)';
   if(state==='speaking'){
     if(!alertFired&&timeLeft===cfg.alert){alertFired=true;alertBip();}
     if(timeLeft<=0){enterOvertime();return;}
-    setRing(timeLeft,totalTime,'var(--green)');
+    setRing(timeLeft,totalTime,col);
     $('timer-display').className='timer-time';
   } else if(state==='overtime'){
     setRing(0,totalTime,'#D85A30');
@@ -477,7 +571,8 @@ function tick(){
 function enterOvertime(){
   state='overtime';timeLeft=0;
   setRing(0,totalTime,'#D85A30');
-  setBadge('⚠ Temps dépassé','phase-badge badge-overtime');
+  const label=currentTour===1?'🟢 Temps dépassé':'🟠 Temps dépassé';
+  setBadge(label,'phase-badge badge-overtime');
   $('timer-display').className='timer-time overtime';
   $('timer-label').textContent='dépassé';
   startOvertimeBips();refreshStrip();
@@ -487,7 +582,7 @@ function enterOvertime(){
 
 function enterSilence(){
   stopBips();clearInterval(ticker);
-  state='silence';totalTime=cfg.silence;timeLeft=cfg.silence;
+  state='silence';totalTime=currentCfg().silence;timeLeft=totalTime;
   $('timer-display').textContent=fmt(timeLeft);
   $('timer-display').className='timer-time';
   $('timer-label').textContent='silence';
@@ -511,13 +606,15 @@ function endSilence(){
 }
 
 function prepareIdle(){
-  state='idle';totalTime=cfg.parole;timeLeft=totalTime;
+  state='idle';totalTime=currentCfg().parole;timeLeft=totalTime;
   $('timer-display').textContent=fmt(timeLeft);
   $('timer-display').className='timer-time';
   $('timer-label').textContent='temps de parole';
-  setBadge('⏸ En attente','phase-badge badge-idle');
-  setRing(timeLeft,totalTime,'var(--green)');
-  setAvatar('P'+(currentPerson+1));
+  const col=currentTour===1?'var(--green)':'var(--orange)';
+  const cls=currentTour===1?'badge-t1':'badge-t2';
+  setBadge((currentTour===1?'⏸ En attente':'⏸ En attente'),'phase-badge badge-idle');
+  setRing(timeLeft,totalTime,col);
+  setAvatar('P'+(currentPerson+1),currentTour===2?'t2':'');
   $('speaker-name').textContent='Personne '+(currentPerson+1);
   $('speaker-sub').textContent='Tour '+(donePeople.length+1)+' sur '+totalPeople;
   showButtons('idle');refreshStrip();
@@ -525,12 +622,12 @@ function prepareIdle(){
 
 function showAllDone(){
   state='done';doneBip();
-  setBadge('✓ Tour terminé','phase-badge badge-speaking');
+  setBadge('✓ Tour terminé','phase-badge badge-t'+(currentTour));
   setAvatar('✓');
-  $('speaker-name').textContent='Tour complet !';
+  $('speaker-name').textContent='Tour '+(currentTour===1?'1':'2')+' complet !';
   $('speaker-sub').textContent='Toutes les personnes ont parlé';
   $('timer-display').textContent='—';
-  setRing(0,1,'var(--green)');
+  setRing(0,1,currentTour===1?'var(--green)':'var(--orange)');
   showButtons('done');refreshStrip();
 }
 
@@ -538,13 +635,16 @@ function showAllDone(){
 function handleStart(){
   try{getCtx().resume();}catch(e){}
   if(state==='idle'){
-    state='speaking';alertFired=false;totalTime=cfg.parole;timeLeft=totalTime;
+    const tc=currentCfg();
+    state='speaking';alertFired=false;totalTime=tc.parole;timeLeft=totalTime;
     $('timer-display').textContent=fmt(timeLeft);
     $('timer-display').className='timer-time';
     $('timer-label').textContent='temps de parole';
-    setBadge('🎤 Parole','phase-badge badge-speaking');
-    setRing(timeLeft,totalTime,'var(--green)');
-    setAvatar('P'+(currentPerson+1));
+    const col=currentTour===1?'var(--green)':'var(--orange)';
+    const cls=currentTour===1?'badge-t1':'badge-t2';
+    setBadge((currentTour===1?'🟢':'🟠')+' Parole','phase-badge '+cls);
+    setRing(timeLeft,totalTime,col);
+    setAvatar('P'+(currentPerson+1),currentTour===2?'t2':'');
     $('speaker-name').textContent='Personne '+(currentPerson+1);
     $('speaker-sub').textContent='Tour '+(donePeople.length+1)+' sur '+totalPeople;
     showButtons('speaking');refreshStrip();
@@ -555,8 +655,8 @@ function handleStart(){
 }
 
 function handleStop(){
-  if(state==='speaking'||state==='overtime'){ clearInterval(ticker);ticker=null;stopBips();enterSilence(); }
-  else if(state==='silence'){ clearInterval(ticker);ticker=null;stopBips();endSilence(); }
+  if(state==='speaking'||state==='overtime'){clearInterval(ticker);ticker=null;stopBips();enterSilence();}
+  else if(state==='silence'){clearInterval(ticker);ticker=null;stopBips();endSilence();}
 }
 
 function handlePause(){
@@ -564,7 +664,8 @@ function handlePause(){
     state=savedState;
     if(state==='overtime') startOvertimeBips();
     ticker=setInterval(tick,1000);
-    setBadge(state==='silence'?'🤫 Silence':'🎤 Parole',state==='silence'?'phase-badge badge-silence':'phase-badge badge-speaking');
+    if(state==='silence') setBadge('🤫 Silence','phase-badge badge-silence');
+    else setBadge((currentTour===1?'🟢':'🟠')+' Parole','phase-badge badge-t'+currentTour);
     showButtons(state==='silence'?'silence':'speaking');
   } else if(state==='speaking'||state==='overtime'||state==='silence'){
     savedState=state;state='paused';
@@ -577,16 +678,18 @@ function handlePause(){
 function handleReset(){
   clearInterval(ticker);ticker=null;stopBips();
   state='idle';currentPerson=0;donePeople=[];alertFired=false;savedState=null;
-  totalTime=cfg.parole;timeLeft=totalTime;
+  totalTime=currentCfg().parole;timeLeft=totalTime;
   $('timer-display').textContent=fmt(timeLeft);
   $('timer-display').className='timer-time';
   $('timer-label').textContent='temps de parole';
   setBadge('⏸ En attente','phase-badge badge-idle');
-  setRing(0,1,'var(--green)');
+  const col=currentTour===1?'var(--green)':'var(--orange)';
+  setRing(0,1,col);
   setAvatar('?','idle');
   $('speaker-name').textContent='—';
   $('speaker-sub').textContent='Appuyer sur Démarrer';
   showButtons('idle');refreshStrip();
+  updateTourUI();
 }
 
 // ─── SETTINGS ─────────────────────────────────────────────
@@ -594,14 +697,18 @@ function openSettings(){ $('settings-panel').classList.add('open'); }
 function closeSettings(){ $('settings-panel').classList.remove('open'); }
 function updateMode(v){ cfg.mode=v;updateModePill(); }
 function onBipChange(v){ cfg.bipType=v; try{getCtx().resume();}catch(e){} playBip(v,0.9); }
-function updateSetting(key,val){ cfg[key]=val; if(key==='silence') $('sv-silence').textContent=val+' s'; if(key==='alert') $('sv-alert').textContent=val+' s'; }
-function updateParoleDisplay(){
-  const min=parseInt($('s-parole-min').value)||1;
-  const sec=parseInt($('s-parole-sec').value)*30;
-  cfg.parole=min*60+sec;
-  $('sv-parole').textContent=min+' min';
-  $('sv-parole-sec').textContent=sec>0?'oui':'non';
-  if(state==='idle'){totalTime=cfg.parole;timeLeft=totalTime;$('timer-display').textContent=fmt(timeLeft);setRing(0,1,'var(--green)');}
+
+function updateParole(tour){
+  const min=parseInt($(('s'+tour+'-parole-min')).value)||1;
+  const sec=parseInt($(('s'+tour+'-parole-sec')).value)*30;
+  cfg['t'+tour].parole=min*60+sec;
+  $(('sv'+tour+'-parole')).textContent=min+' min';
+  $(('sv'+tour+'-parole-sec')).textContent=sec>0?'oui':'non';
+  if(state==='idle'&&currentTour===tour){totalTime=cfg['t'+tour].parole;timeLeft=totalTime;$('timer-display').textContent=fmt(timeLeft);setRing(0,1,tour===1?'var(--green)':'var(--orange)');}
+}
+function updateSilence(tour,val){
+  cfg['t'+tour].silence=val;
+  $(('sv'+tour+'-silence')).textContent=val+' s';
 }
 function changePeople(d){
   totalPeople=Math.max(2,Math.min(10,totalPeople+d));
@@ -611,12 +718,14 @@ function changePeople(d){
 }
 
 // ─── INIT ─────────────────────────────────────────────────
-$('s-parole-min').value=3;$('s-parole-sec').value=0;
-$('s-silence').value=60;$('s-alert').value=15;
-$('sv-parole').textContent='3 min';$('sv-parole-sec').textContent='non';
-$('sv-silence').textContent='60 s';$('sv-alert').textContent='15 s';
+$('s1-parole-min').value=3; $('s1-parole-sec').value=0;
+$('s2-parole-min').value=2; $('s2-parole-sec').value=0;
+$('s1-silence').value=60;   $('s2-silence').value=60;
+$('s-alert').value=15;
 $('people-val').textContent=totalPeople;
-updateModePill();handleReset();
+updateModePill();
+resize();
+handleReset();
 
 if('wakeLock' in navigator){
   navigator.wakeLock.request('screen').catch(()=>{});

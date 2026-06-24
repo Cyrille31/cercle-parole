@@ -1,4 +1,4 @@
-const CACHE = 'cercle-v3';
+const CACHE = 'cercle-v4';
 const ASSETS = ['/cercle-parole/', '/cercle-parole/index.html', '/cercle-parole/manifest.json', '/cercle-parole/icons/icon-192.png', '/cercle-parole/icons/icon-512.png', '/cercle-parole/icons/logo_cgexcel.jpg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
