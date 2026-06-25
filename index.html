@@ -365,12 +365,23 @@
       </div>
     </div>
 
+
+    <div class="settings-section">
+      <div class="settings-section-title">Affichage</div>
+      <div class="settings-row">
+        <label>Rotation écran autorisée</label>
+        <select id="s-rotation" onchange="updateRotation(this.value)">
+          <option value="locked">Non (portrait fixe)</option>
+          <option value="free">Oui (rotation libre)</option>
+        </select>
+      </div>
+    </div>
     <div class="settings-section">
       <div class="settings-section-title">Crédits</div>
       <div class="credits-block">
         <strong>Cyrille Gindre</strong><br>
         <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-        Version <span class="version-badge">V03</span> — 24/06/2026<br><br>
+        Version <span class="version-badge">V04</span> — 25/06/2026<br><br>
         <strong>Lien de téléchargement :</strong><br>
         <a href="https://cyrille31.github.io/cercle-parole/" target="_blank">cyrille31.github.io/cercle-parole</a>
       </div>
@@ -381,6 +392,7 @@
 <script>
 // ─── CONFIG ───────────────────────────────────────────────
 let cfg = {
+  rotationFree: false,
   t1: { parole:180, silence:60 },
   t2: { parole:120, silence:60 },
   alert:15, bipType:'soft', mode:'sound', bipInterval:2
@@ -432,6 +444,21 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', ()=>{ setTimeout(resize, 150); });
+
+// ─── ROTATION LOCK ────────────────────────────────────────
+function updateRotation(val) {
+  cfg.rotationFree = (val === 'free');
+  applyRotationLock();
+}
+function applyRotationLock() {
+  if (screen.orientation && screen.orientation.lock) {
+    if (cfg.rotationFree) {
+      screen.orientation.unlock();
+    } else {
+      screen.orientation.lock('portrait').catch(()=>{});
+    }
+  }
+}
 
 // ─── AUDIO ────────────────────────────────────────────────
 function getCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
@@ -726,6 +753,7 @@ $('people-val').textContent=totalPeople;
 updateModePill();
 resize();
 handleReset();
+applyRotationLock();
 
 if('wakeLock' in navigator){
   navigator.wakeLock.request('screen').catch(()=>{});
