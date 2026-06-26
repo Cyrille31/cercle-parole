@@ -5,7 +5,7 @@
   "start_url": "/cercle-parole/",
   "scope": "/cercle-parole/",
   "display": "standalone",
-  "orientation": "any",
+  "orientation": "portrait",
   "theme_color": "#1D9E75",
   "background_color": "#F1EFE8",
   "icons": [
