@@ -337,7 +337,7 @@
       </div>
       <div class="settings-row">
         <label>Silence (secondes)</label>
-        <input type="range" min="15" max="120" step="15" id="s1-silence" oninput="updateSilence(1,+this.value)">
+        <input type="range" min="0" max="120" step="15" id="s1-silence" oninput="updateSilence(1,+this.value)">
         <span class="val" id="sv1-silence">60 s</span>
       </div>
     </div>
@@ -356,7 +356,7 @@
       </div>
       <div class="settings-row">
         <label>Silence (secondes)</label>
-        <input type="range" min="15" max="120" step="15" id="s2-silence" oninput="updateSilence(2,+this.value)" class="orange-thumb">
+        <input type="range" min="0" max="120" step="15" id="s2-silence" oninput="updateSilence(2,+this.value)" class="orange-thumb">
         <span class="val orange" id="sv2-silence">60 s</span>
       </div>
     </div>
@@ -414,7 +414,7 @@
           <div>
             <strong>Cyrille Gindre</strong><br>
             <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-            Version <span class="version-badge">V12</span> — 26/06/2026
+            Version <span class="version-badge">V13</span> — 26/06/2026
           </div>
           <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:62px;width:auto;border-radius:6px;flex-shrink:0">
         </div>
@@ -701,6 +701,8 @@ function enterOvertime(){
 
 function enterSilence(){
   stopBips();clearInterval(ticker);
+  // If silence is disabled, go straight to next person
+  if(currentCfg().silence===0){ endSilence(); return; }
   state='silence';totalTime=currentCfg().silence;timeLeft=totalTime;
   $('timer-display').textContent=fmt(timeLeft);
   $('timer-display').className='timer-time';
@@ -845,7 +847,7 @@ function updateParole(tour){
 }
 function updateSilence(tour,val){
   cfg['t'+tour].silence=val;
-  $(('sv'+tour+'-silence')).textContent=val+' s';
+  $(('sv'+tour+'-silence')).textContent=val===0?'désactivé':val+' s';
 }
 function changePeople(d){
   totalPeople=Math.max(2,Math.min(10,totalPeople+d));
@@ -857,7 +859,7 @@ function changePeople(d){
 // ─── INIT ─────────────────────────────────────────────────
 $('s1-parole-min').value=3; $('s1-parole-sec').value=0;
 $('s2-parole-min').value=2; $('s2-parole-sec').value=0;
-$('s1-silence').value=60;   $('s2-silence').value=60;
+$('s1-silence').value=60;   $('s2-silence').value=60; $('sv1-silence').textContent='60 s'; $('sv2-silence').textContent='60 s';
 $('s-alert').value=15;
 $('people-val').textContent=totalPeople;
 updateModePill();
