@@ -370,7 +370,7 @@
       <div class="credits-block">
         <strong>Cyrille Gindre</strong><br>
         <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-        Version <span class="version-badge">V07</span> — 26/06/2026<br><br>
+        Version <span class="version-badge">V08</span> — 26/06/2026<br><br>
         <strong>Lien de téléchargement :</strong><br>
         <a href="https://cyrille31.github.io/cercle-parole/" target="_blank">cyrille31.github.io/cercle-parole</a>
       </div>
@@ -692,8 +692,18 @@ function handleReset(){
 }
 
 // ─── SETTINGS ─────────────────────────────────────────────
-function openSettings(){ $('settings-panel').classList.add('open'); }
-function closeSettings(){ $('settings-panel').classList.remove('open'); }
+function openSettings(){
+  $('settings-panel').classList.add('open');
+  // Push a fake history state so Android back button triggers popstate, not app exit
+  history.pushState({ settings: true }, '');
+}
+function closeSettings(){
+  $('settings-panel').classList.remove('open');
+  // Pop the fake history entry we pushed on open
+  if (history.state && history.state.settings) {
+    history.back();
+  }
+}
 function updateMode(v){ cfg.mode=v;updateModePill(); }
 function onBipChange(v){ cfg.bipType=v; try{getCtx().resume();}catch(e){} playBip(v,0.9); }
 
@@ -732,6 +742,14 @@ if('wakeLock' in navigator){
     if(document.visibilityState==='visible') try{await navigator.wakeLock.request('screen');}catch(e){}
   });
 }
+// Android back button interception
+window.addEventListener('popstate', (e) => {
+  if ($('settings-panel').classList.contains('open')) {
+    // Just close the panel - popstate already consumed the fake history entry
+    $('settings-panel').classList.remove('open');
+  }
+});
+
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
