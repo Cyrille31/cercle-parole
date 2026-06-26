@@ -414,7 +414,7 @@
           <div>
             <strong>Cyrille Gindre</strong><br>
             <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-            Version <span class="version-badge">V15</span> — 26/06/2026
+            Version <span class="version-badge">V17</span> — 26/06/2026
           </div>
           <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:62px;width:auto;border-radius:6px;flex-shrink:0">
         </div>
@@ -881,39 +881,33 @@ window.addEventListener('popstate', (e) => {
   }
 });
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => {
+// ─── UPDATE DETECTION via version check ──────────────────
+const CURRENT_VERSION = 'V17';
 
-    function checkForWaiting(reg) {
-      if (reg.waiting && navigator.serviceWorker.controller) {
-        showUpdateBanner();
-      }
+async function checkForUpdate() {
+  // Skip check if offline
+  if (!navigator.onLine) return;
+  try {
+    const res = await fetch('sw.js?t=' + Date.now(), {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000) // timeout 5s
+    });
+    if (!res.ok) return;
+    const text = await res.text();
+    const match = text.match(/const CACHE = '([^']+)'/);
+    if (!match) return;
+    const remoteCache = match[1];
+    const localCache = localStorage.getItem('sw-cache-name');
+    if (!localCache) {
+      // First time: just record current version, no banner
+      localStorage.setItem('sw-cache-name', remoteCache);
+    } else if (localCache !== remoteCache) {
+      // Version changed: show banner
+      showUpdateBanner();
     }
-
-    // Already waiting when page loads?
-    checkForWaiting(reg);
-
-    // New SW found while page is open
-    reg.addEventListener('updatefound', () => {
-      const nw = reg.installing;
-      nw.addEventListener('statechange', () => {
-        if (nw.state === 'installed') checkForWaiting(reg);
-      });
-    });
-
-    // Check for updates periodically and on visibility change
-    setInterval(() => reg.update(), 60000);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') reg.update().then(() => checkForWaiting(reg));
-    });
-
-    // When new SW takes over, reload
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!refreshing) { refreshing = true; window.location.reload(); }
-    });
-
-  }).catch(()=>{});
+  } catch(e) {
+    // Network error or timeout — silent fail, try again later
+  }
 }
 
 function showUpdateBanner() {
@@ -921,16 +915,33 @@ function showUpdateBanner() {
 }
 
 function doUpdate() {
+  // Clear stored cache name so next load picks up new one
+  localStorage.removeItem('sw-cache-name');
+  // Unregister SW and reload fresh
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistration().then(reg => {
-      if (reg && reg.waiting) {
-        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-      } else {
-        window.location.reload();
-      }
+      if (reg) reg.unregister();
+    }).finally(() => {
+      // Clear caches then reload
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).finally(() => {
+        window.location.reload(true);
+      });
     });
+  } else {
+    window.location.reload(true);
   }
 }
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// Check for update on load and every 2 minutes
+checkForUpdate();
+setInterval(checkForUpdate, 120000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') checkForUpdate();
+});
 
 function updateAlert(val) {
   cfg.alert = val;
