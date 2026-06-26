@@ -393,14 +393,95 @@
     <div class="settings-section">
       <div class="settings-section-title">Crédits</div>
       <div class="credits-block">
-        <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:54px;width:auto;display:block;margin-bottom:10px;border-radius:6px"><strong>Cyrille Gindre</strong><br>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <strong style="font-size:15px">Cyrille Gindre</strong>
+          <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:36px;width:auto;border-radius:5px;flex-shrink:0">
+        </div>
         <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-        Version <span class="version-badge">V09</span> — 26/06/2026<br><br>
+        Version <span class="version-badge">V10</span> — 26/06/2026<br><br>
         <strong>Lien de téléchargement :</strong><br>
         <a href="https://cyrille31.github.io/cercle-parole/" target="_blank">cyrille31.github.io/cercle-parole</a>
       </div>
     </div>
   </div>
+
+  <!-- HELP PANEL -->
+  <div id="help-panel">
+    <div class="help-topbar">
+      <button class="icon-btn" onclick="closeHelp()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h2>Mode d'emploi</h2>
+    </div>
+    <div class="help-body">
+
+      <div class="help-section">
+        <h3>🎯 Principe</h3>
+        <p>L'application régule le temps de parole dans un cercle de groupe. Une personne est désignée <strong>maître du temps</strong> — c'est elle qui pose le téléphone au centre de la table et gère les boutons.</p>
+        <p>Il y a deux tours : un <strong>1er tour</strong> (vert) et un <strong>2e tour</strong> (orange), chacun avec ses propres durées paramétrables.</p>
+      </div>
+
+      <div class="help-section">
+        <h3>🟢 Déroulement d'un tour</h3>
+        <div class="help-step"><div class="help-step-num">1</div><p>Choisissez le tour (1er ou 2e) dans la barre en haut.</p></div>
+        <div class="help-step"><div class="help-step-num">2</div><p>Appuyez sur <strong>Démarrer</strong> quand la personne commence à parler.</p></div>
+        <div class="help-step"><div class="help-step-num">3</div><p>Un <strong>bip d'alerte</strong> retentit 15 secondes avant la fin (configurable).</p></div>
+        <div class="help-step"><div class="help-step-num">4</div><p>À la fin du temps, un <strong>bip répété</strong> signale le dépassement — discret mais persistant.</p></div>
+        <div class="help-step"><div class="help-step-num">5</div><p>Appuyez sur <strong>Terminer</strong> quand la personne a fini. Une période de silence démarre automatiquement.</p></div>
+        <div class="help-step"><div class="help-step-num">6</div><p>Pendant le silence, appuyez sur <strong>Suivant</strong> pour passer à la personne suivante, ou laissez le silence se terminer seul.</p></div>
+        <div class="help-step"><div class="help-step-num">7</div><p>Répétez pour chaque personne. Les points en haut montrent la progression.</p></div>
+        <div class="help-tip">💡 Le bouton <strong>⟳</strong> en haut à gauche réinitialise le tour en cours.</div>
+      </div>
+
+      <div class="help-section">
+        <h3>⏸ Pause</h3>
+        <p>Le bouton <strong>Pause</strong> suspend le chronomètre. Appuyez sur <strong>Reprendre</strong> pour continuer.</p>
+      </div>
+
+      <div class="help-section">
+        <h3>⚙️ Réglages</h3>
+        <ul>
+          <li><strong>Nombre de personnes</strong> : de 2 à 10</li>
+          <li><strong>Durée de parole</strong> : 1 à 5 min + option 30 s, par tour</li>
+          <li><strong>Durée du silence</strong> : 15 s à 2 min, par tour</li>
+          <li><strong>Alerte avant fin</strong> : 5 à 30 secondes</li>
+          <li><strong>Intervalle bip répété</strong> : 1, 2, 5 ou 10 secondes</li>
+          <li><strong>Mode signal</strong> : son, vibreur, les deux, ou silencieux</li>
+          <li><strong>Type de bip</strong> : 6 sons au choix, prévisualisés au clic</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <h3>📲 Installation sur Android</h3>
+        <div class="help-step"><div class="help-step-num">1</div><p>Ouvrez Chrome et allez sur <code>cyrille31.github.io/cercle-parole</code></p></div>
+        <div class="help-step"><div class="help-step-num">2</div><p>Chrome affiche une bannière <strong>"Installer l'application"</strong> — appuyez dessus.</p></div>
+        <div class="help-step"><div class="help-step-num">3</div><p>L'appli apparaît sur l'écran d'accueil, sans barre Chrome.</p></div>
+        <div class="help-tip">💡 Partagez le lien par SMS ou email — n'importe qui peut l'installer en un tap.</div>
+      </div>
+
+      <div class="help-section">
+        <h3>🔄 Mettre à jour vers la dernière version</h3>
+        <p>Le navigateur garde en cache l'ancienne version. Pour forcer la mise à jour :</p>
+        <p><strong>Sur Android :</strong></p>
+        <ul>
+          <li>Désinstallez l'appli si elle est installée</li>
+          <li>Chrome → 3 points → <strong>Historique → Effacer les données de navigation</strong></li>
+          <li>Cochez <strong>Images et fichiers en cache</strong> ET <strong>Cookies et données de site</strong>, période : <strong>Toutes les périodes</strong></li>
+          <li>Effacez, puis retournez sur l'URL et réinstallez</li>
+        </ul>
+        <p><strong>Sur PC (Chrome) :</strong></p>
+        <ul>
+          <li>Ouvrez l'URL dans Chrome</li>
+          <li>Appuyez sur <strong>F12</strong> → onglet <strong>Application → Service Workers</strong> → cochez <strong>"Update on reload"</strong></li>
+          <li>Puis <strong>Application → Storage → "Clear site data"</strong></li>
+          <li>Rechargez (<strong>F5</strong>)</li>
+        </ul>
+        <div class="help-warn">⚠️ La version en cours est indiquée dans Réglages → Crédits.</div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <script>
