@@ -1,4 +1,4 @@
-const CACHE = 'cercle-v15';
+const CACHE = 'cercle-v16';
 const ASSETS = [
   '/cercle-parole/',
   '/cercle-parole/index.html',
@@ -9,7 +9,9 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  // Pre-cache assets but do NOT skipWaiting — wait for page to trigger it
+  // This allows the page to detect reg.waiting and show the update banner
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
 });
 
 self.addEventListener('activate', e => {
@@ -22,7 +24,7 @@ self.addEventListener('fetch', e => {
   e.respondWith(caches.match(e.request).then(cached => cached || fetch(e.request)));
 });
 
-// Allow page to trigger immediate activation of new SW
+// Page sends SKIP_WAITING when user taps the update banner
 self.addEventListener('message', e => {
   if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
 });

@@ -414,7 +414,7 @@
           <div>
             <strong>Cyrille Gindre</strong><br>
             <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-            Version <span class="version-badge">V13</span> — 26/06/2026
+            Version <span class="version-badge">V14</span> — 26/06/2026
           </div>
           <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:62px;width:auto;border-radius:6px;flex-shrink:0">
         </div>
@@ -883,21 +883,41 @@ window.addEventListener('popstate', (e) => {
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').then(reg => {
-    // Check for updates every time the page is focused
+
+    function checkForWaiting(reg) {
+      if (reg.waiting && navigator.serviceWorker.controller) {
+        showUpdateBanner();
+      }
+    }
+
+    // Already waiting when page loads?
+    checkForWaiting(reg);
+
+    // New SW found while page is open
     reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          // New version available — show banner
-          document.getElementById('update-banner').classList.add('show');
-        }
+      const nw = reg.installing;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed') checkForWaiting(reg);
       });
     });
-    // Also check on focus
+
+    // Check for updates periodically and on visibility change
+    setInterval(() => reg.update(), 60000);
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') reg.update();
+      if (document.visibilityState === 'visible') reg.update().then(() => checkForWaiting(reg));
     });
+
+    // When new SW takes over, reload
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) { refreshing = true; window.location.reload(); }
+    });
+
   }).catch(()=>{});
+}
+
+function showUpdateBanner() {
+  document.getElementById('update-banner').classList.add('show');
 }
 
 function doUpdate() {
@@ -905,10 +925,11 @@ function doUpdate() {
     navigator.serviceWorker.getRegistration().then(reg => {
       if (reg && reg.waiting) {
         reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      } else {
+        window.location.reload();
       }
     });
   }
-  window.location.reload();
 }
 
 function updateAlert(val) {
