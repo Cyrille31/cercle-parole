@@ -230,6 +230,20 @@
   .badge-synthese{background:var(--purple-bg);color:var(--purple-dark)}
   .btn-purple{background:var(--purple);color:#fff;border-color:var(--purple-dark)}
   .btn-purple:active:not(:disabled){background:var(--purple-dark)}
+
+  /* ── UPDATE BUTTON ── */
+  .update-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:calc(100% - 28px);margin:16px 14px 0;
+    padding:13px;border-radius:var(--radius);
+    background:var(--green-bg);color:var(--green-dark);
+    border:1.5px solid var(--green);
+    font-size:14px;font-weight:600;cursor:pointer;
+    transition:all 0.15s;
+  }
+  .update-btn:active{background:var(--green-light)}
+  .update-btn.checking{opacity:0.6;pointer-events:none}
+  .update-btn svg{width:18px;height:18px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -261,7 +275,7 @@
     <div style="display:flex;align-items:center;gap:6px">
       <h1>Cercle de parole</h1>
       <span class="mode-pill" id="mode-pill">🔊</span>
-      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V24</span>
+      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V26</span>
     </div>
     <div style="display:flex;gap:6px">
       <button class="icon-btn" onclick="openHelp()" aria-label="Mode d'emploi" title="Mode d'emploi">
@@ -456,7 +470,7 @@
           <div>
             <strong>Cyrille Gindre</strong><br>
             <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-            Version <span class="version-badge">V24</span> — 26/06/2026
+            Version <span class="version-badge">V26</span> — 26/06/2026
           </div>
           <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:62px;width:auto;border-radius:6px;flex-shrink:0">
         </div>
@@ -464,6 +478,15 @@
         <a href="https://cyrille31.github.io/cercle-parole/" target="_blank">cyrille31.github.io/cercle-parole</a></div>
       </div>
     </div>
+
+    <button class="update-btn" id="update-btn" onclick="forceUpdate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      Vérifier et installer une nouvelle version
+    </button>
+    <p style="font-size:11px;color:var(--text-muted);text-align:center;padding:6px 14px 16px;margin:0">
+      Efface le cache et recharge. Nécessite une connexion internet.
+    </p>
+
   </div>
 
   <!-- HELP PANEL -->
@@ -522,7 +545,7 @@
 
       <div class="help-section">
         <h3>🔄 Mettre à jour vers la dernière version</h3>
-        <p>Le numéro de version est affiché en petit dans la barre du haut (ex: <strong>V24</strong>) et dans Réglages → Crédits. Comparez-le avec la version annoncée par Cyrille Gindre pour savoir si une mise à jour est disponible.</p>
+        <p>Le numéro de version est affiché en petit dans la barre du haut (ex: <strong>V26</strong>) et dans Réglages → Crédits. Comparez-le avec la version annoncée par Cyrille Gindre pour savoir si une mise à jour est disponible.</p>
         <p style="margin-top:8px">Pour mettre à jour :</p>
         <p><strong>Sur Android :</strong> Chrome → 3 points → <strong>Historique → Effacer les données de navigation</strong> → cochez <em>Images et fichiers en cache</em> ET <em>Cookies et données de site</em> → Toutes les périodes → Effacer → rouvrez l'URL.</p>
         <p style="margin-top:6px"><strong>Sur PC :</strong> F12 → onglet <strong>Application → Service Workers</strong> → cocher <em>"Update on reload"</em> → <strong>Storage → "Clear site data"</strong> → F5.</p>
@@ -885,6 +908,30 @@ function updateSyntheseAlert(val){
   cfg.syntheseAlert=val;
   $('sv-synthese-alert').textContent=val===0?'désactivée':val+' s';
 }
+function forceUpdate() {
+  const btn = $('update-btn');
+  btn.classList.add('checking');
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Mise à jour en cours…`;
+  // 1. Unregister service worker
+  const doReload = () => {
+    // 2. Clear all caches
+    if ('caches' in window) {
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).finally(() => {
+        window.location.reload(true);
+      });
+    } else {
+      window.location.reload(true);
+    }
+  };
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      Promise.all(regs.map(r => r.unregister())).finally(doReload);
+    }).catch(doReload);
+  } else {
+    doReload();
+  }
+}
+
 function openHelp(){
   $('help-panel').classList.add('open');
   history.pushState({ help: true }, '');

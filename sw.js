@@ -1,4 +1,4 @@
-const CACHE = 'cercle-v26';
+const CACHE = 'cercle-v28';
 const ASSETS = [
   '/cercle-parole/',
   '/cercle-parole/index.html',
