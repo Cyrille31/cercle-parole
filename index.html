@@ -261,7 +261,7 @@
     <div style="display:flex;align-items:center;gap:6px">
       <h1>Cercle de parole</h1>
       <span class="mode-pill" id="mode-pill">🔊</span>
-      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V22</span>
+      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V24</span>
     </div>
     <div style="display:flex;gap:6px">
       <button class="icon-btn" onclick="openHelp()" aria-label="Mode d'emploi" title="Mode d'emploi">
@@ -456,7 +456,7 @@
           <div>
             <strong>Cyrille Gindre</strong><br>
             <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-            Version <span class="version-badge">V22</span> — 26/06/2026
+            Version <span class="version-badge">V24</span> — 26/06/2026
           </div>
           <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:62px;width:auto;border-radius:6px;flex-shrink:0">
         </div>
@@ -522,7 +522,7 @@
 
       <div class="help-section">
         <h3>🔄 Mettre à jour vers la dernière version</h3>
-        <p>Le numéro de version est affiché en petit dans la barre du haut (ex: <strong>V22</strong>) et dans Réglages → Crédits. Comparez-le avec la version annoncée par Cyrille Gindre pour savoir si une mise à jour est disponible.</p>
+        <p>Le numéro de version est affiché en petit dans la barre du haut (ex: <strong>V24</strong>) et dans Réglages → Crédits. Comparez-le avec la version annoncée par Cyrille Gindre pour savoir si une mise à jour est disponible.</p>
         <p style="margin-top:8px">Pour mettre à jour :</p>
         <p><strong>Sur Android :</strong> Chrome → 3 points → <strong>Historique → Effacer les données de navigation</strong> → cochez <em>Images et fichiers en cache</em> ET <em>Cookies et données de site</em> → Toutes les périodes → Effacer → rouvrez l'URL.</p>
         <p style="margin-top:6px"><strong>Sur PC :</strong> F12 → onglet <strong>Application → Service Workers</strong> → cocher <em>"Update on reload"</em> → <strong>Storage → "Clear site data"</strong> → F5.</p>
@@ -672,18 +672,16 @@ function showButtons(mode){
     bp.innerHTML=`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
   } else if(mode==='silence'){
     bs.style.display='none'; bs.classList.remove('btn-full');
-    bt.style.display='flex';bt.classList.add(gc);bt.classList.add('btn-full');bt.disabled=false;
+    bt.style.display='flex';bt.classList.add(gc);bt.classList.remove('btn-full');bt.disabled=false;
     bt.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`;
     bp.style.display='flex';bp.classList.remove('btn-full');bp.disabled=false;
     bp.innerHTML=`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
   } else if(mode==='paused'){
-    const isSil=savedState==='silence';
     bs.style.display='none';
-    bt.style.display=isSil?'flex':'none';
-    if(isSil){bt.classList.add(gc);bt.classList.add('btn-full');bt.disabled=false;}
-    bp.style.display='flex';bp.disabled=false;
+    bt.style.display='flex';bt.classList.add(gc);bt.classList.remove('btn-full');bt.disabled=false;
+    bt.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`;
+    bp.style.display='flex';bp.classList.remove('btn-full');bp.disabled=false;
     bp.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Reprendre`;
-    if(!isSil){bp.classList.add('btn-full');}else{bp.classList.remove('btn-full');}
   } else if(mode==='done'){
     bs.style.display='none';bt.style.display='none';bp.style.display='none';
   }
@@ -831,6 +829,12 @@ function handleStart(){
 function handleStop(){
   if(state==='speaking'||state==='overtime'){clearInterval(ticker);ticker=null;stopBips();enterSilence();}
   else if(state==='silence'){clearInterval(ticker);ticker=null;stopBips();endSilence();}
+  else if(state==='paused'){
+    clearInterval(ticker);ticker=null;stopBips();
+    state=savedState; // restore so enterSilence/endSilence work correctly
+    if(state==='speaking'||state==='overtime') enterSilence();
+    else if(state==='silence') endSilence();
+  }
 }
 
 function handlePause(){
