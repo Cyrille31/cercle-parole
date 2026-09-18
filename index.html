@@ -116,8 +116,8 @@
   .pdot-done{background:var(--green-bg);color:var(--green-dark);border-color:var(--green-light)}
   .pdot-done-t2{background:var(--orange-bg);color:var(--orange-dark);border-color:var(--orange)}
   .pdot-overtime{background:var(--red-bg);color:var(--red-dark);border-color:var(--red);box-shadow:0 0 0 3px rgba(216,90,48,0.15)}
-  .pdot-ready-t1{background:var(--green-bg);color:var(--green-dark);border-color:var(--green);box-shadow:0 0 0 3px var(--green-bg)}
-  .pdot-ready-t2{background:var(--orange-bg);color:var(--orange-dark);border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-bg)}
+  .pdot-ready-t1{background:var(--green);color:#fff;border-color:var(--green-dark);box-shadow:0 0 0 3px var(--green-bg)}
+  .pdot-ready-t2{background:var(--orange);color:#fff;border-color:var(--orange-dark);box-shadow:0 0 0 3px var(--orange-bg)}
 
   /* TIMER */
   .timer-wrap{
@@ -731,6 +731,7 @@ function showButtons(mode){
 
 function refreshStrip(){
   const s=$('people-strip');s.innerHTML='';
+  if(currentTour===3){ resize(); return; } // pas de ronds en synthèse
   const ac=currentTour===1?'pdot-active-t1':'pdot-active-t2';
   const rc=currentTour===1?'pdot-ready-t1':'pdot-ready-t2';
   const dc=currentTour===1?'pdot-done':'pdot-done-t2';
@@ -743,7 +744,7 @@ function refreshStrip(){
     d.className='pdot '+(done?dc:over?'pdot-overtime':active?ac:ready?rc:'pdot-waiting');
     if(over) d.classList.add('pulsing');
     d.textContent='P'+(i+1);
-    if(currentTour!==3){ d.style.cursor='pointer'; }
+    d.style.cursor='pointer';
     const idx=i;
     d.addEventListener('click',()=>dotClick(idx));
     s.appendChild(d);
