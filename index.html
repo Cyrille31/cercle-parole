@@ -116,6 +116,8 @@
   .pdot-done{background:var(--green-bg);color:var(--green-dark);border-color:var(--green-light)}
   .pdot-done-t2{background:var(--orange-bg);color:var(--orange-dark);border-color:var(--orange)}
   .pdot-overtime{background:var(--red-bg);color:var(--red-dark);border-color:var(--red);box-shadow:0 0 0 3px rgba(216,90,48,0.15)}
+  .pdot-ready-t1{background:var(--green-bg);color:var(--green-dark);border-color:var(--green);box-shadow:0 0 0 3px var(--green-bg)}
+  .pdot-ready-t2{background:var(--orange-bg);color:var(--orange-dark);border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-bg)}
 
   /* TIMER */
   .timer-wrap{
@@ -730,16 +732,18 @@ function showButtons(mode){
 function refreshStrip(){
   const s=$('people-strip');s.innerHTML='';
   const ac=currentTour===1?'pdot-active-t1':'pdot-active-t2';
+  const rc=currentTour===1?'pdot-ready-t1':'pdot-ready-t2';
   const dc=currentTour===1?'pdot-done':'pdot-done-t2';
   for(let i=0;i<totalPeople;i++){
     const d=document.createElement('div');
     const done=donePeople.includes(i);
     const active=!done&&state!=='idle'&&i===currentPerson;
+    const ready=!done&&state==='idle'&&i===currentPerson;
     const over=active&&state==='overtime';
-    d.className='pdot '+(done?dc:over?'pdot-overtime':active?ac:'pdot-waiting');
+    d.className='pdot '+(done?dc:over?'pdot-overtime':active?ac:ready?rc:'pdot-waiting');
     if(over) d.classList.add('pulsing');
     d.textContent='P'+(i+1);
-    d.style.cursor='pointer';
+    if(currentTour!==3){ d.style.cursor='pointer'; }
     const idx=i;
     d.addEventListener('click',()=>dotClick(idx));
     s.appendChild(d);
@@ -749,20 +753,35 @@ function refreshStrip(){
 
 function dotClick(i){
   if(currentTour===3) return; // synthèse : pas de sélection individuelle
-  if(donePeople.includes(i)) return; // déjà passé
-  if(state==='speaking'||state==='overtime'){
-    if(i===currentPerson){ handleStop(); } // terminer la personne active
-    return;
+
+  // Si décompte en cours (parole, overtime, silence, pause) : interrompre proprement
+  if(state==='speaking'||state==='overtime'||state==='silence'||state==='paused'){
+    clearInterval(ticker); ticker=null; stopBips();
   }
-  if(state==='silence') return;
-  if(state==='paused') return;
-  // idle : sélectionner cette personne et démarrer
+
+  // Recalculer donePeople : personnes < i marquées comme passées, personnes > i remises en attente
+  donePeople = [];
+  for(let j=0;j<i;j++) donePeople.push(j);
+
+  // Placer la personne i en "prêt à démarrer" (idle)
   currentPerson=i;
-  setAvatar('P'+(currentPerson+1),currentTour===2?'t2':'');
-  $('speaker-name').textContent='Personne '+(currentPerson+1);
+  state='idle';
+  alertFired=false;
+  savedState=null;
+  totalTime=currentCfg().parole;
+  timeLeft=totalTime;
+  $('timer-display').textContent=fmt(timeLeft);
+  $('timer-display').className='timer-time';
+  $('timer-label').textContent='temps de parole';
+  const col=currentTour===1?'var(--green)':'var(--orange)';
+  const cls=currentTour===1?'badge-t1':'badge-t2';
+  setBadge('⏸ En attente','phase-badge badge-idle');
+  setRing(0,1,col);
+  setAvatar('P'+(i+1),currentTour===2?'t2':'');
+  $('speaker-name').textContent='Personne '+(i+1);
   $('speaker-sub').textContent='Tour '+(donePeople.length+1)+' sur '+totalPeople;
+  showButtons('idle');
   refreshStrip();
-  handleStart();
 }
 
 function ringClick(){
