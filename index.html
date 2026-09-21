@@ -328,7 +328,7 @@
     <div style="display:flex;align-items:center;gap:6px">
       <h1>Cercle de parole</h1>
       <span class="mode-pill" id="mode-pill">🔊</span>
-      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V28</span>
+      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V28.1</span>
     </div>
     <div style="display:flex;gap:6px">
       <button class="icon-btn" onclick="openHelp()" aria-label="Mode d'emploi" title="Mode d'emploi">
@@ -821,36 +821,34 @@ function setBadge(txt,cls){ const b=$('phase-badge');if(b){b.textContent=txt;b.c
 function setAvatar(txt,cls){ const a=$('speaker-avatar');if(a){a.textContent=txt;a.className='speaker-avatar '+(cls||'');} }
 function setSpeaker(name,sub){ const n=$('speaker-name'),s=$('speaker-sub');if(n)n.textContent=name;if(s)s.textContent=sub; }
 
+function btnClass(base, extra){
+  // Construit proprement la className d'un bouton sans laisser de résidus
+  return ('btn '+base+' '+(extra||'')).trim().replace(/\s+/g,' ');
+}
 function showButtons(mode){
   const bs=$('btn-start'),bt=$('btn-stop'),bp=$('btn-pause');
-  const gc=currentTour===1?'btn-green':'btn-orange';
-  // reset classes
-  [bs,bt].forEach(b=>b.className=b.className.replace(/btn-green|btn-orange/g,'').trim());
+  const gc=currentTour===1?'btn-green':currentTour===2?'btn-orange':'btn-purple';
+  const SVG_PLAY=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+  const SVG_STOP=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg>`;
+  const SVG_PAUSE=`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
   if(mode==='idle'){
-    bs.style.display='flex';bs.classList.add('btn-full',gc);bs.disabled=false;
-    bs.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Démarrer`;
-    bt.style.display='none';bp.style.display='none';
-    bp.classList.remove('btn-full');
-  } else if(mode==='speaking'){
-    bs.style.display='none';bs.classList.remove('btn-full');
-    bt.style.display='flex';bt.classList.add(gc);bt.disabled=false;
-    bt.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`;
-    bp.style.display='flex';bp.classList.remove('btn-full');bp.disabled=false;
-    bp.innerHTML=`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
-  } else if(mode==='silence'){
-    bs.style.display='none'; bs.classList.remove('btn-full');
-    bt.style.display='flex';bt.classList.add(gc);bt.classList.remove('btn-full');bt.disabled=false;
-    bt.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`;
-    bp.style.display='flex';bp.classList.remove('btn-full');bp.disabled=false;
-    bp.innerHTML=`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
+    bs.className=btnClass(gc,'btn-full'); bs.style.display='flex'; bs.disabled=false;
+    bs.innerHTML=SVG_PLAY+' Démarrer';
+    bt.style.display='none'; bp.style.display='none';
+  } else if(mode==='speaking'||mode==='silence'){
+    bs.style.display='none';
+    bt.className=btnClass(gc); bt.style.display='flex'; bt.disabled=false;
+    bt.innerHTML=SVG_STOP+' Terminer';
+    bp.className=btnClass(''); bp.style.display='flex'; bp.disabled=false;
+    bp.innerHTML=SVG_PAUSE+' Pause';
   } else if(mode==='paused'){
     bs.style.display='none';
-    bt.style.display='flex';bt.classList.add(gc);bt.classList.remove('btn-full');bt.disabled=false;
-    bt.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M5 12l7 7 7-7"/></svg> Terminer`;
-    bp.style.display='flex';bp.classList.remove('btn-full');bp.disabled=false;
-    bp.innerHTML=`<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Reprendre`;
+    bt.className=btnClass(gc); bt.style.display='flex'; bt.disabled=false;
+    bt.innerHTML=SVG_STOP+' Terminer';
+    bp.className=btnClass(''); bp.style.display='flex'; bp.disabled=false;
+    bp.innerHTML=SVG_PLAY+' Reprendre';
   } else if(mode==='done'){
-    bs.style.display='none';bt.style.display='none';bp.style.display='none';
+    bs.style.display='none'; bt.style.display='none'; bp.style.display='none';
   }
 }
 
@@ -902,10 +900,11 @@ function dotClick(i){
   const col=currentTour===1?'var(--green)':'var(--orange)';
   const cls=currentTour===1?'badge-t1':'badge-t2';
   setBadge('⏸ En attente','phase-badge badge-idle');
-  setRing(0,1,col);
+  setRing(totalTime,totalTime,col);
   setAvatar('P'+(i+1),currentTour===2?'t2':'');
   $('speaker-name').textContent='Personne '+(i+1);
   $('speaker-sub').textContent='Tour '+(donePeople.length+1)+' sur '+totalPeople;
+  setPauseLabel(false);
   showButtons('idle');
   refreshStrip();
 }
@@ -991,12 +990,12 @@ function prepareIdle(){
   $('timer-display').className='timer-time';
   $('timer-label').textContent='temps de parole';
   const col=currentTour===1?'var(--green)':'var(--orange)';
-  const cls=currentTour===1?'badge-t1':'badge-t2';
-  setBadge((currentTour===1?'⏸ En attente':'⏸ En attente'),'phase-badge badge-idle');
-  setRing(timeLeft,totalTime,col);
+  setBadge('⏸ En attente','phase-badge badge-idle');
+  setRing(totalTime,totalTime,col);
   setAvatar('P'+(currentPerson+1),currentTour===2?'t2':'');
   $('speaker-name').textContent='Personne '+(currentPerson+1);
   $('speaker-sub').textContent='Tour '+(donePeople.length+1)+' sur '+totalPeople;
+  setPauseLabel(false);
   showButtons('idle');refreshStrip();
 }
 
@@ -1176,23 +1175,19 @@ function forceUpdate() {
 
 function openHelp(){
   $('help-panel').classList.add('open');
-  history.pushState({ help: true }, '');
+  history.pushState({ panel: 'help' }, '');
 }
 function closeHelp(){
   $('help-panel').classList.remove('open');
-  if (history.state && history.state.help) history.back();
+  if (history.state && history.state.panel==='help') history.back();
 }
 function openSettings(){
   $('settings-panel').classList.add('open');
-  // Push a fake history state so Android back button triggers popstate, not app exit
-  history.pushState({ settings: true }, '');
+  history.pushState({ panel: 'settings' }, '');
 }
 function closeSettings(){
   $('settings-panel').classList.remove('open');
-  // Pop the fake history entry we pushed on open
-  if (history.state && history.state.settings) {
-    history.back();
-  }
+  if (history.state && history.state.panel==='settings') history.back();
 }
 function updateMode(v){ cfg.mode=v;updateModePill(); }
 function onBipChange(v){ cfg.bipType=v; try{getCtx().resume();}catch(e){} playBip(v,0.9); }
@@ -1334,14 +1329,22 @@ if('wakeLock' in navigator){
     if(document.visibilityState==='visible') try{await navigator.wakeLock.request('screen');}catch(e){}
   });
 }
-// Android back button interception
+// Android back button : ferme le panneau ouvert au lieu de sortir de l'appli
 window.addEventListener('popstate', (e) => {
+  // On retire juste la classe open — pas de history.back() ici (évite boucle)
   if ($('help-panel').classList.contains('open')) {
     $('help-panel').classList.remove('open');
   } else if ($('settings-panel').classList.contains('open')) {
     $('settings-panel').classList.remove('open');
   }
+  // Si aucun panneau n'était ouvert, on repousse un état neutre pour ne pas sortir de la PWA
+  else {
+    history.pushState({ panel: null }, '');
+  }
 });
+
+// État initial dans l'historique pour bloquer le retour Android au niveau PWA
+if (!history.state) history.replaceState({ panel: null }, '');
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
