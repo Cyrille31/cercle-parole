@@ -94,13 +94,6 @@
     overflow:hidden;
   }
 
-  /* BADGE */
-  .phase-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.3px;white-space:nowrap}
-  .badge-idle{background:var(--gray-bg);color:var(--gray)}
-  .badge-t1{background:var(--green-bg);color:var(--green-dark)}
-  .badge-t2{background:var(--orange-bg);color:var(--orange-dark)}
-  .badge-overtime{background:var(--red-bg);color:var(--red-dark)}
-  .badge-silence{background:var(--purple-bg);color:var(--purple-dark)}
 
   /* PEOPLE */
   .people-strip{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;width:100%}
@@ -131,14 +124,6 @@
   .timer-time.overtime{color:var(--red)}
   .timer-label{font-size:var(--label-font,11px);color:var(--text-muted);margin-top:4px}
 
-  /* SPEAKER CARD */
-  .speaker-card{width:100%;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-  .speaker-avatar{width:var(--avatar-size,36px);height:var(--avatar-size,36px);border-radius:50%;background:var(--green-bg);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0;}
-  .speaker-avatar.t2{background:var(--orange-bg);color:var(--orange-dark)}
-  .speaker-avatar.silence{background:var(--purple-bg);color:var(--purple-dark)}
-  .speaker-avatar.idle{background:var(--gray-bg);color:var(--gray)}
-  .speaker-name{font-size:var(--card-font,13px);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .speaker-sub{font-size:var(--card-sub,11px);color:var(--text-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* BUTTONS */
   .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%}
@@ -249,13 +234,25 @@
   }
   #gtb-adj-row.hidden{display:none}
   .gtb-big-btn{
-    width:44px;height:32px;border-radius:10px;border:1.5px solid var(--border);
-    background:var(--surface);color:var(--text);font-size:22px;font-weight:300;
+    width:60px;height:44px;border-radius:12px;border:1.5px solid var(--border);
+    background:var(--surface);color:var(--text);font-size:30px;font-weight:300;
     cursor:pointer;display:flex;align-items:center;justify-content:center;
     line-height:1;padding:0;flex-shrink:0;transition:background 0.1s;
   }
   .gtb-big-btn:active{background:var(--surface2)}
   .gtb-adj-hint{font-size:10px;color:var(--text-muted);text-align:center;flex:1}
+  /* Bouton compact pour ré-afficher le timer quand il est masqué */
+  #gtb-show-btn{
+    display:none;
+    align-self:center;
+    padding:5px 14px;height:30px;
+    border-radius:20px;border:1px solid var(--border);
+    background:var(--surface);color:var(--text-muted);
+    font-size:11px;font-weight:600;cursor:pointer;
+    white-space:nowrap;transition:background 0.1s;
+    flex-shrink:0;
+  }
+  #gtb-show-btn:active{background:var(--surface2)}
   .gtb-panel{
     flex:1;background:var(--surface);border:0.5px solid var(--border);
     border-radius:8px;padding:5px 8px;display:flex;flex-direction:column;gap:2px;min-width:0;
@@ -273,7 +270,6 @@
   /* synthese */
   .tour-btn.synthese{border-color:var(--purple)}
   .tour-btn.active-s{background:var(--purple);color:#fff;border-color:var(--purple-dark)}
-  .badge-synthese{background:var(--purple-bg);color:var(--purple-dark)}
   .btn-purple{background:var(--purple);color:#fff;border-color:var(--purple-dark)}
   .btn-purple:active:not(:disabled){background:var(--purple-dark)}
 
@@ -328,7 +324,7 @@
     <div style="display:flex;align-items:center;gap:6px">
       <h1>Cercle de parole</h1>
       <span class="mode-pill" id="mode-pill">🔊</span>
-      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V28.2</span>
+      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V29</span>
     </div>
     <div style="display:flex;gap:6px">
       <button class="icon-btn" onclick="openHelp()" aria-label="Mode d'emploi" title="Mode d'emploi">
@@ -360,10 +356,10 @@
   <!-- MAIN -->
   <div class="main" id="main">
 
-    <!-- GLOBAL TIMER BAR -->
+    <!-- GLOBAL TIMER BAR (masqué par défaut — clic sur un panel pour masquer) -->
     <div id="global-timer-bar">
       <!-- Gauche : théorique -->
-      <div class="gtb-panel">
+      <div class="gtb-panel" onclick="toggleGlobalTimer('0')" style="cursor:pointer" title="Masquer le timer global">
         <div class="gtb-title">Théorique</div>
         <div class="gtb-row">
           <span class="gtb-label">Fin prévue</span>
@@ -378,7 +374,7 @@
       <div class="gtb-sep"></div>
 
       <!-- Droite : réel estimé -->
-      <div class="gtb-panel">
+      <div class="gtb-panel" onclick="toggleGlobalTimer('0')" style="cursor:pointer" title="Masquer le timer global">
         <div class="gtb-title">Réel estimé</div>
         <div class="gtb-row">
           <span class="gtb-label">Fin estimée</span>
@@ -394,6 +390,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Bouton compact "Timer global" affiché quand le timer est masqué -->
+    <button id="gtb-show-btn" onclick="toggleGlobalTimer('1')" title="Afficher le timer global">⏱ Timer global</button>
 
     <!-- BOUTONS +/− SOUS LES PAVÉS TIMER -->
     <div id="gtb-adj-row">
@@ -572,7 +571,7 @@
           <div>
             <strong>Cyrille Gindre</strong><br>
             <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-            Version <span class="version-badge">V28</span> — 21/09/2026
+            Version <span class="version-badge">V29</span> — 21/09/2026
           </div>
           <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:62px;width:auto;border-radius:6px;flex-shrink:0">
         </div>
@@ -646,7 +645,6 @@
         <div class="help-step"><div class="help-step-num">6</div><p>Après <strong>Terminer</strong>, une période de <strong>silence</strong> démarre automatiquement. Laissez-la s'écouler, ou appuyez sur Terminer pour passer directement.</p></div>
         <div class="help-step"><div class="help-step-num">7</div><p>Répétez pour chaque personne. Les petits ronds en haut montrent la progression.</p></div>
         <div class="help-tip">💡 Vous pouvez cliquer sur n'importe quel petit rond pour sauter directement à cette personne — même en cours de décompte. Les personnes précédentes sont alors marquées comme passées.</div>
-        <div class="help-tip">💡 Le bouton <strong>⟳</strong> en haut à gauche réinitialise le tour en cours.</div>
       </div>
 
       <div class="help-section">
@@ -669,7 +667,27 @@
           <li><strong>Intervalle bip répété</strong> : 1, 2, 5 ou 10 secondes, ou désactivé</li>
           <li><strong>Mode signal</strong> : son, vibreur, les deux, ou silencieux</li>
           <li><strong>Type de bip</strong> : 6 sons au choix, prévisualisés au clic</li>
+          <li><strong>Timer global</strong> : afficher ou masquer le panneau de durée globale (masqué par défaut)</li>
         </ul>
+        <div class="help-tip">💡 Le bouton <strong>⟳</strong> en haut à gauche réinitialise le cercle — il demande confirmation avant d'effacer la progression.</div>
+      </div>
+
+      <div class="help-section">
+        <h3>⏱ Timer global</h3>
+        <p>Le timer global est <strong>masqué par défaut</strong>. Pour l'afficher, appuyez sur le bouton <strong>⏱ Timer global</strong> qui apparaît en haut de l'écran principal.</p>
+        <p style="margin-top:8px">Une fois affiché, il montre deux panneaux :</p>
+        <ul style="margin-top:6px">
+          <li>🔵 <strong>Théorique</strong> — heure de fin et temps restant selon les durées paramétrées</li>
+          <li>🟢 <strong>Réel estimé</strong> — heure de fin et temps restant selon l'avancement réel, avec indicateur d'avance ou de retard</li>
+        </ul>
+        <p style="margin-top:8px">Les boutons <strong>−</strong> et <strong>+</strong> permettent d'ajuster la durée théorique de ± 1 minute à la fois (utile si la séance commence en retard).</p>
+        <p style="margin-top:8px">Pour masquer le timer, appuyez sur l'un des deux panneaux.</p>
+      </div>
+
+      <div class="help-section">
+        <h3>📱 Bouton retour Android</h3>
+        <p>Le bouton retour physique (ou le geste de retour) <strong>ferme le panneau Réglages ou Mode d'emploi</strong> s'il est ouvert, sans quitter l'application.</p>
+        <p style="margin-top:8px">Si aucun panneau n'est ouvert, le bouton retour est neutralisé — il ne fait pas sortir de l'application.</p>
       </div>
 
       <div class="help-section">
@@ -707,7 +725,7 @@ let cfg = {
 };
 let currentTour = 1;
 let totalPeople = 4;
-let showGlobalTimer = true;
+let showGlobalTimer = false;
 let globalAdjustSec = 0; // ajustement manuel en secondes
 
 // ─── STATE ────────────────────────────────────────────────
@@ -734,25 +752,21 @@ function resize() {
   const availH  = window.innerHeight - topbarH - tourH - Math.max(6, safeBot) - 8;
   const availW  = Math.min(window.innerWidth, 500) - 28;
 
-  const badgeH  = 24;
-  const stripH  = showGlobalTimer ? 42 : 0; // ronds masqués en synthèse, mais hauteur conservée si timer visible
-  const gtbH    = showGlobalTimer ? 54 : 0;
-  const cardH   = 54;
+  // Hauteurs des éléments réellement présents dans le DOM
+  const gtbH    = showGlobalTimer ? 62 : 22; // timer bar (62) ou bouton compact (22)
+  const adjH    = showGlobalTimer ? 52 : 0;  // boutons ± uniquement si timer visible
+  const stripH  = currentTour !== 3 ? 42 : 0; // ronds des personnes (pas en synthèse)
   const btnsH   = 50;
-  const gaps    = 6 * 5;
-  const ringAvail = availH - badgeH - (currentTour!==3?42:0) - gtbH - cardH - btnsH - gaps;
+  const gaps    = 6 * 4;
+  const ringAvail = availH - gtbH - adjH - stripH - btnsH - gaps;
   const ringSize  = Math.max(100, Math.min(Math.floor(ringAvail), availW));
 
   const R = document.documentElement.style;
   R.setProperty('--ring-size',  ringSize + 'px');
-  R.setProperty('--time-font',  Math.max(24, Math.floor(ringSize * 0.26)) + 'px');
+  R.setProperty('--time-font',  Math.max(28, Math.floor(ringSize * 0.32)) + 'px');
   R.setProperty('--label-font', Math.max(9,  Math.floor(ringSize * 0.052)) + 'px');
   const dot = Math.max(26, Math.min(38, Math.floor(availW / (totalPeople + 2))));
   R.setProperty('--dot-size', dot + 'px');
-  const av = Math.max(30, Math.min(42, Math.floor(cardH * 0.72)));
-  R.setProperty('--avatar-size', av + 'px');
-  R.setProperty('--card-font',  Math.max(11, Math.min(14, Math.floor(cardH * 0.24))) + 'px');
-  R.setProperty('--card-sub',   Math.max(9,  Math.min(12, Math.floor(cardH * 0.18))) + 'px');
   const bh = Math.max(38, Math.min(52, Math.floor(btnsH * 0.92)));
   R.setProperty('--btn-h',    bh + 'px');
   R.setProperty('--btn-font', Math.max(11, Math.min(14, Math.floor(bh * 0.28))) + 'px');
@@ -817,9 +831,7 @@ function updateTourUI(){
 // ─── UI ───────────────────────────────────────────────────
 function fmt(s){ if(s<0){const a=-s;return '-'+Math.floor(a/60)+':'+(a%60<10?'0':'')+a%60;} return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
 function setRing(left,total,color){ const pct=total>0?Math.max(0,left/total):0; $('ring-track').setAttribute('stroke-dashoffset',(CIRC*(1-pct)).toFixed(1)); if(color) $('ring-track').setAttribute('stroke',color); }
-function setBadge(txt,cls){ const b=$('phase-badge');if(b){b.textContent=txt;b.className='phase-badge '+cls;} }
-function setAvatar(txt,cls){ const a=$('speaker-avatar');if(a){a.textContent=txt;a.className='speaker-avatar '+(cls||'');} }
-function setSpeaker(name,sub){ const n=$('speaker-name'),s=$('speaker-sub');if(n)n.textContent=name;if(s)s.textContent=sub; }
+// setBadge / setAvatar / setSpeaker supprimés (éléments retirés du DOM depuis V27)
 
 function btnClass(base, extra){
   // Construit proprement la className d'un bouton sans laisser de résidus
@@ -898,11 +910,7 @@ function dotClick(i){
   $('timer-display').className='timer-time';
   $('timer-label').textContent='temps de parole';
   const col=currentTour===1?'var(--green)':'var(--orange)';
-  const cls=currentTour===1?'badge-t1':'badge-t2';
-  setBadge('⏸ En attente','phase-badge badge-idle');
   setRing(totalTime,totalTime,col);
-  setAvatar('P'+(i+1),currentTour===2?'t2':'');
-  setSpeaker('Personne '+(i+1),'Tour '+(donePeople.length+1)+' sur '+totalPeople);
   setPauseLabel(false);
   showButtons('idle');
   refreshStrip();
@@ -946,8 +954,6 @@ function tick(){
 function enterOvertime(){
   state='overtime';timeLeft=0;
   setRing(0,totalTime,'#D85A30');
-  const label=currentTour===1?'🟢 Temps dépassé':'🟠 Temps dépassé';
-  setBadge(label,'phase-badge badge-overtime');
   $('timer-display').className='timer-time overtime';
   $('timer-label').textContent='dépassé';
   startOvertimeBips();refreshStrip();
@@ -963,9 +969,6 @@ function enterSilence(){
   $('timer-display').textContent=fmt(timeLeft);
   $('timer-display').className='timer-time';
   $('timer-label').textContent='silence';
-  setBadge('🤫 Silence','phase-badge badge-silence');
-  setAvatar('🌙','silence');
-  setSpeaker('Silence','Laissez décanter…');
   setRing(timeLeft,totalTime,'var(--purple)');
   showButtons('silence');refreshStrip();
   ticker=setInterval(tick,1000);
@@ -988,10 +991,7 @@ function prepareIdle(){
   $('timer-display').className='timer-time';
   $('timer-label').textContent='temps de parole';
   const col=currentTour===1?'var(--green)':'var(--orange)';
-  setBadge('⏸ En attente','phase-badge badge-idle');
   setRing(totalTime,totalTime,col);
-  setAvatar('P'+(currentPerson+1),currentTour===2?'t2':'');
-  setSpeaker('Personne '+(currentPerson+1),'Tour '+(donePeople.length+1)+' sur '+totalPeople);
   setPauseLabel(false);
   showButtons('idle');refreshStrip();
 }
@@ -1010,9 +1010,6 @@ function showAllDone(){
   }
   // currentTour===3 : fin de synthèse
   state='done';
-  setBadge('✓ Synthèse terminée','phase-badge badge-synthese');
-  setAvatar('✓');
-  setSpeaker('Synthèse terminée !','Le cercle est complet');
   $('timer-display').textContent='—';
   setRing(0,1,'var(--purple)');
   showButtons('done');refreshStrip();
@@ -1028,18 +1025,11 @@ function handleStart(){
     $('timer-display').className='timer-time';
     if(currentTour===3){
       $('timer-label').textContent='synthèse';
-      setBadge('💬 Synthèse','phase-badge badge-synthese');
       setRing(timeLeft,totalTime,'var(--purple)');
-      setAvatar('💬','silence');
-      setSpeaker('Synthèse du cercle', fmt(cfg.synthese)+' au total');
     } else {
       $('timer-label').textContent='temps de parole';
       const col=currentTour===1?'var(--green)':'var(--orange)';
-      const cls=currentTour===1?'badge-t1':'badge-t2';
-      setBadge((currentTour===1?'🟢':'🟠')+' Parole','phase-badge '+cls);
       setRing(timeLeft,totalTime,col);
-      setAvatar('P'+(currentPerson+1),currentTour===2?'t2':'');
-      setSpeaker('Personne '+(currentPerson+1),'Tour '+(donePeople.length+1)+' sur '+totalPeople);
       refreshStrip();
     }
     showButtons('speaking');
@@ -1064,14 +1054,11 @@ function handlePause(){
     state=savedState;
     if(state==='overtime') startOvertimeBips();
     ticker=setInterval(tick,1000);
-    if(state==='silence') setBadge('🤫 Silence','phase-badge badge-silence');
-    else setBadge((currentTour===1?'🟢':'🟠')+' Parole','phase-badge badge-t'+currentTour);
     showButtons(state==='silence'?'silence':'speaking');
     setPauseLabel(false);
   } else if(state==='speaking'||state==='overtime'||state==='silence'){
     savedState=state;state='paused';
     clearInterval(ticker);ticker=null;stopBips();
-    setBadge('⏸ Pause','phase-badge badge-idle');
     showButtons('paused');
     setPauseLabel(true);
   }
@@ -1086,11 +1073,8 @@ function doReset(resetTimer){
   $('timer-display').className='timer-time';
   $('timer-label').textContent='temps de parole';
   setPauseLabel(false);
-  setBadge('⏸ En attente','phase-badge badge-idle');
   const col=currentTour===1?'var(--green)':'var(--orange)';
   setRing(0,1,col);
-  setAvatar('?','idle');
-  setSpeaker('—','Appuyer sur Démarrer');
   showButtons('idle');refreshStrip();
   updateTourUI();
   updateGlobalTimer();
@@ -1301,10 +1285,21 @@ function adjustGlobal(d){
 function toggleGlobalTimer(v){
   showGlobalTimer = v==='1';
   $('global-timer-bar').classList.toggle('hidden', !showGlobalTimer);
+  $('gtb-adj-row').classList.toggle('hidden', !showGlobalTimer);
+  $('gtb-show-btn').style.display = showGlobalTimer ? 'none' : 'block';
+  // Sync le select dans les réglages
+  const sel = $('s-global-timer');
+  if(sel) sel.value = showGlobalTimer ? '1' : '0';
+  if(showGlobalTimer) updateGlobalTimer();
+  resize();
 }
 
 // ─── INIT ─────────────────────────────────────────────────
-$('global-timer-bar').classList.toggle('hidden', !showGlobalTimer);
+// Timer global masqué par défaut
+$('global-timer-bar').classList.add('hidden');
+$('gtb-adj-row').classList.add('hidden');
+$('gtb-show-btn').style.display = 'block';
+$('s-global-timer').value = '0';
 $('s1-parole-min').value=3; $('s1-parole-sec').value=0;
 $('s2-parole-min').value=2; $('s2-parole-sec').value=0;
 $('s1-silence').value=60;   $('s2-silence').value=60; $('sv1-silence').textContent='60 s'; $('sv2-silence').textContent='60 s';
