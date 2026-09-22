@@ -373,7 +373,7 @@
     <div style="display:flex;align-items:center;gap:6px">
       <h1>Cercle de parole</h1>
       <span class="mode-pill" id="mode-pill">🔊</span>
-      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V29.4</span>
+      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V29.5</span>
     </div>
     <div style="display:flex;gap:6px">
       <button class="icon-btn" onclick="openMethode()" aria-label="La méthode" title="La méthode" style="font-size:16px">🌿</button>
@@ -626,7 +626,7 @@
           <div>
             <strong>Cyrille Gindre</strong><br>
             <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-            Version <span class="version-badge">V29.4</span> — 22/09/2026
+            Version <span class="version-badge">V29.5</span> — 22/09/2026
           </div>
           <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:62px;width:auto;border-radius:6px;flex-shrink:0">
         </div>
@@ -1298,13 +1298,18 @@ function doReset(resetTimer){
   clearInterval(ticker);ticker=null;stopBips();
   if(resetTimer){ globalStartTime=Date.now(); globalAdjustSec=0; }
   state='idle';currentPerson=0;donePeople=[];alertFired=false;savedState=null;
-  totalTime=currentCfg().parole;timeLeft=totalTime;
-  $('timer-display').textContent=fmt(timeLeft);
-  $('timer-display').className='timer-time';
   if(currentTour===3){
+    totalTime=cfg.syntheseSilence; timeLeft=totalTime;
+    // Affiche "2 + 8" (silence + partage) pour que la structure soit lisible avant de démarrer
+    const mSil=Math.round(cfg.syntheseSilence/60), mPar=Math.round(cfg.synthesePartage/60);
+    $('timer-display').textContent=mSil+' + '+mPar;
+    $('timer-display').className='timer-time';
     $('timer-label').textContent='synthèse';
     setRing(0,1,'var(--purple)');
   } else {
+    totalTime=currentCfg().parole; timeLeft=totalTime;
+    $('timer-display').textContent=fmt(timeLeft);
+    $('timer-display').className='timer-time';
     $('timer-label').textContent='temps de parole';
     const col=currentTour===1?'var(--green)':'var(--orange)';
     setRing(0,1,col);
