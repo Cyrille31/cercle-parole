@@ -62,3 +62,17 @@ Chaque personne peut l'installer en un tap depuis son téléphone.
 - Puis le chrono se remet à zéro pour la personne suivante
 
 Tous les paramètres (durées, volume, type de bip) sont modifiables dans les réglages.
+
+---
+
+## Licence
+
+Ce logiciel est publié sous [licence MIT](LICENSE) : utilisation, copie,
+modification et redistribution libres, y compris en usage professionnel.
+
+Il est accompagné de la **BAL 1.0 — [Bonne Action License](BAL.md)** : un vœu
+sur l'honneur, et non une condition juridique. Vous êtes simplement invité à
+**faire une bonne action chaque jour**. Ne pas le faire ne vous retire aucun
+droit.
+
+© 2026 Cyrille — CGExcel
