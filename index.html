@@ -373,7 +373,7 @@
     <div style="display:flex;align-items:center;gap:6px">
       <h1>Cercle de parole</h1>
       <span class="mode-pill" id="mode-pill">🔊</span>
-      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V29.1</span>
+      <span style="font-size:10px;color:var(--text-muted);font-weight:500">V29.2</span>
     </div>
     <div style="display:flex;gap:6px">
       <button class="icon-btn" onclick="openMethode()" aria-label="La méthode" title="La méthode" style="font-size:16px">🌿</button>
@@ -557,13 +557,18 @@
     <div class="settings-section">
       <div class="settings-section-title" style="color:var(--purple-dark)">💬 Synthèse — durées</div>
       <div class="settings-row">
-        <label>Durée de la synthèse</label>
-        <input type="range" min="1" max="30" step="1" id="s-synthese" oninput="updateSynthese(+this.value)">
-        <span class="val" style="color:var(--purple-dark)" id="sv-synthese">10 min</span>
+        <label>Silence intérieur</label>
+        <input type="range" min="1" max="10" step="1" id="s-synthese-silence" oninput="updateSyntheseSilence(+this.value)" style="accent-color:var(--purple)">
+        <span class="val" style="color:var(--purple-dark)" id="sv-synthese-silence">2 min</span>
+      </div>
+      <div class="settings-row">
+        <label>Partage collectif</label>
+        <input type="range" min="1" max="20" step="1" id="s-synthese-partage" oninput="updateSynthesePartage(+this.value)" style="accent-color:var(--purple)">
+        <span class="val" style="color:var(--purple-dark)" id="sv-synthese-partage">8 min</span>
       </div>
       <div class="settings-row">
         <label>Alerte avant fin synthèse</label>
-        <input type="range" min="0" max="60" step="5" id="s-synthese-alert" oninput="updateSyntheseAlert(+this.value)">
+        <input type="range" min="0" max="60" step="5" id="s-synthese-alert" oninput="updateSyntheseAlert(+this.value)" style="accent-color:var(--purple)">
         <span class="val" style="color:var(--purple-dark)" id="sv-synthese-alert">30 s</span>
       </div>
     </div>
@@ -621,7 +626,7 @@
           <div>
             <strong>Cyrille Gindre</strong><br>
             <a href="mailto:cgexcel.31@gmail.com">cgexcel.31@gmail.com</a><br>
-            Version <span class="version-badge">V29.1</span> — 22/09/2026
+            Version <span class="version-badge">V29.2</span> — 22/09/2026
           </div>
           <img src="icons/logo_cgexcel.jpg" alt="CGExcel" style="height:62px;width:auto;border-radius:6px;flex-shrink:0">
         </div>
@@ -774,7 +779,7 @@
 
       <!-- Préambule -->
       <div class="methode-intro">
-        <p>Cette méthode de cercle de parole est issue de la <strong>conversation dans l'Esprit de la démarche synodale</strong>. Elle favorise une écoute profonde et un partage authentique, sans débat ni interaction entre les prises de parole.</p>
+        <p>Cette méthode de cercle de parole est issue de la <strong>conversation dans l'Esprit de la démarche synodale</strong>. Elle favorise une écoute profonde et un partage authentique.</p>
         <p style="margin-top:6px">Elle comprend <strong>trois temps collectifs</strong> précédés d'un temps de préparation personnelle, non géré par le logiciel.</p>
         <p class="methode-source">Méthode : démarche synodale</p>
       </div>
@@ -870,10 +875,16 @@
 let cfg = {
   t1: { parole:180, silence:60 },
   t2: { parole:120, silence:60 },
-  synthese: 600,
+  syntheseSilence: 120,   // 2 min — silence intérieur avant partage
+  synthesePartage: 480,   // 8 min — temps de partage collectif
   syntheseAlert: 30,
   alert:15, bipType:'soft', mode:'sound', bipInterval:5
 };
+// cfg.synthese est calculé dynamiquement
+Object.defineProperty(cfg, 'synthese', {
+  get(){ return cfg.syntheseSilence + cfg.synthesePartage; },
+  enumerable: true
+});
 let currentTour = 1;
 let totalPeople = 4;
 let showGlobalTimer = false;
@@ -892,7 +903,8 @@ const CIRC = 753.98;
 function currentCfg() {
   if(currentTour===1) return cfg.t1;
   if(currentTour===2) return cfg.t2;
-  return { parole: cfg.synthese, silence: 0 };
+  // Tour 3 : silence intérieur puis partage — géré dans handleStart / enterSynthesePartage
+  return { parole: cfg.synthesePartage, silence: 0 };
 }
 
 // ─── RESPONSIVE LAYOUT ────────────────────────────────────
@@ -1099,6 +1111,16 @@ function tick(){
   } else if(state==='silence'){
     if(timeLeft<=0){endSilence();return;}
     setRing(timeLeft,totalTime,'var(--purple)');
+  } else if(state==='synthese-silence'){
+    if(!alertFired&&timeLeft<=cfg.syntheseAlert&&timeLeft>0){alertFired=true;alertBip();}
+    if(timeLeft<=0){enterSynthesePartage();return;}
+    setRing(timeLeft,totalTime,'var(--purple)');
+    $('timer-display').className='timer-time';
+  } else if(state==='synthese-partage'){
+    if(!alertFired&&timeLeft<=cfg.syntheseAlert&&timeLeft>0){alertFired=true;alertBip();}
+    if(timeLeft<=0){endSynthesePartage();return;}
+    setRing(timeLeft,totalTime,'var(--purple)');
+    $('timer-display').className='timer-time';
   }
 }
 
@@ -1166,36 +1188,64 @@ function showAllDone(){
   showButtons('done');refreshStrip();
 }
 
+function enterSynthesePartage(){
+  // Bip de transition entre silence intérieur et partage collectif
+  doneBip();
+  state='synthese-partage';alertFired=false;
+  totalTime=cfg.synthesePartage;timeLeft=totalTime;
+  $('timer-display').textContent=fmt(timeLeft);
+  $('timer-display').className='timer-time';
+  $('timer-label').textContent='partage collectif';
+  setRing(timeLeft,totalTime,'var(--purple)');
+  ticker=setInterval(tick,1000);
+}
+
+function endSynthesePartage(){
+  clearInterval(ticker);ticker=null;
+  showAllDone();
+}
+
 // ─── HANDLERS ─────────────────────────────────────────────
 function handleStart(){
   try{getCtx().resume();}catch(e){}
   if(state==='idle'){
-    const tc=currentCfg();
-    state='speaking';alertFired=false;totalTime=tc.parole;timeLeft=totalTime;
-    $('timer-display').textContent=fmt(timeLeft);
-    $('timer-display').className='timer-time';
     if(currentTour===3){
-      $('timer-label').textContent='synthèse';
+      // Synthèse : démarre la phase silence intérieur
+      state='synthese-silence';alertFired=false;
+      totalTime=cfg.syntheseSilence;timeLeft=totalTime;
+      $('timer-display').textContent=fmt(timeLeft);
+      $('timer-display').className='timer-time';
+      $('timer-label').textContent='silence intérieur';
       setRing(timeLeft,totalTime,'var(--purple)');
+      showButtons('speaking');
+      ticker=setInterval(tick,1000);
     } else {
+      const tc=currentCfg();
+      state='speaking';alertFired=false;totalTime=tc.parole;timeLeft=totalTime;
+      $('timer-display').textContent=fmt(timeLeft);
+      $('timer-display').className='timer-time';
       $('timer-label').textContent='temps de parole';
       const col=currentTour===1?'var(--green)':'var(--orange)';
       setRing(timeLeft,totalTime,col);
       refreshStrip();
+      showButtons('speaking');
+      ticker=setInterval(tick,1000);
     }
-    showButtons('speaking');
-    ticker=setInterval(tick,1000);
   }
 }
 
 function handleStop(){
   if(state==='speaking'||state==='overtime'){clearInterval(ticker);ticker=null;stopBips();enterSilence();}
   else if(state==='silence'){clearInterval(ticker);ticker=null;stopBips();endSilence();}
+  else if(state==='synthese-silence'){clearInterval(ticker);ticker=null;stopBips();enterSynthesePartage();}
+  else if(state==='synthese-partage'){clearInterval(ticker);ticker=null;stopBips();endSynthesePartage();}
   else if(state==='paused'){
     clearInterval(ticker);ticker=null;stopBips();
-    state=savedState; // restore so enterSilence/endSilence work correctly
+    state=savedState;
     if(state==='speaking'||state==='overtime') enterSilence();
     else if(state==='silence') endSilence();
+    else if(state==='synthese-silence') enterSynthesePartage();
+    else if(state==='synthese-partage') endSynthesePartage();
   }
 }
 
@@ -1206,8 +1256,11 @@ function handlePause(){
     if(state==='overtime') startOvertimeBips();
     ticker=setInterval(tick,1000);
     showButtons(state==='silence'?'silence':'speaking');
+    // Restaurer le label pour les états synthèse
+    if(state==='synthese-silence') $('timer-label').textContent='silence intérieur';
+    else if(state==='synthese-partage') $('timer-label').textContent='partage collectif';
     setPauseLabel(false);
-  } else if(state==='speaking'||state==='overtime'||state==='silence'){
+  } else if(state==='speaking'||state==='overtime'||state==='silence'||state==='synthese-silence'||state==='synthese-partage'){
     savedState=state;state='paused';
     clearInterval(ticker);ticker=null;stopBips();
     showButtons('paused');
@@ -1222,10 +1275,15 @@ function doReset(resetTimer){
   totalTime=currentCfg().parole;timeLeft=totalTime;
   $('timer-display').textContent=fmt(timeLeft);
   $('timer-display').className='timer-time';
-  $('timer-label').textContent='temps de parole';
+  if(currentTour===3){
+    $('timer-label').textContent='synthèse';
+    setRing(0,1,'var(--purple)');
+  } else {
+    $('timer-label').textContent='temps de parole';
+    const col=currentTour===1?'var(--green)':'var(--orange)';
+    setRing(0,1,col);
+  }
   setPauseLabel(false);
-  const col=currentTour===1?'var(--green)':'var(--orange)';
-  setRing(0,1,col);
   showButtons('idle');refreshStrip();
   updateTourUI();
   updateGlobalTimer();
@@ -1269,9 +1327,13 @@ function startupValidate(){
 }
 
 // ─── SETTINGS ─────────────────────────────────────────────
-function updateSynthese(val){
-  cfg.synthese=val*60;
-  $('sv-synthese').textContent=val+' min';
+function updateSyntheseSilence(val){
+  cfg.syntheseSilence=val*60;
+  $('sv-synthese-silence').textContent=val+' min';
+}
+function updateSynthesePartage(val){
+  cfg.synthesePartage=val*60;
+  $('sv-synthese-partage').textContent=val+' min';
 }
 function updateSyntheseAlert(val){
   cfg.syntheseAlert=val;
@@ -1343,8 +1405,6 @@ function updateSilence(tour,val){
 function changePeople(d){
   totalPeople=Math.max(2,Math.min(10,totalPeople+d));
   $('people-val').textContent=totalPeople;
-$('s-synthese').value=10;
-$('s-synthese-alert').value=30;
   if(state==='idle'){donePeople=[];currentPerson=0;refreshStrip();}
   resize();
 }
@@ -1372,6 +1432,10 @@ function calcRemainingReal(){
     rem += Math.max(0, timeLeft);
     // s'il reste du silence après parole en cours
     if(state==='speaking'||state==='overtime') rem += cfg['t'+Math.min(currentTour,2)]?.silence||0;
+  } else if(state==='synthese-silence'){
+    rem += Math.max(0, timeLeft) + cfg.synthesePartage;
+  } else if(state==='synthese-partage'){
+    rem += Math.max(0, timeLeft);
   }
 
   // Personnes restantes dans le tour actuel (non passées et pas la courante)
@@ -1464,7 +1528,8 @@ $('s2-parole-min').value=2; $('s2-parole-sec').value=0;
 $('s1-silence').value=60;   $('s2-silence').value=60; $('sv1-silence').textContent='60 s'; $('sv2-silence').textContent='60 s';
 $('s-alert').value=15;
 $('people-val').textContent=totalPeople;
-$('s-synthese').value=10;
+$('s-synthese-silence').value=2;
+$('s-synthese-partage').value=8;
 $('s-synthese-alert').value=30;
 updateModePill();
 resize();
